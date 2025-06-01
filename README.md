@@ -34,23 +34,7 @@ This application streamlines the AI prompt optimization process through the foll
 
 This process helps in crafting more effective and efficient prompts tailored to specific needs.
 
-## Screenshots
-
-*(Coming Soon: Add screenshots of the application in action here. For example, the main interface, prompt input, optimization options, and results display.)*
-
-## Project info
-
-**URL**: https://lovable.dev/projects/49c3844a-e881-4c88-9610-4f6e10a6cf05
-
 ## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/49c3844a-e881-4c88-9610-4f6e10a6cf05) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
 
 **Use your preferred IDE**
 
