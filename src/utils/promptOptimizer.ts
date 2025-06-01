@@ -1,4 +1,3 @@
-
 import { SystemPrompt, getSystemPromptByPlatform } from './systemPrompts';
 import { PromptEngineer, PromptAnalysis, OptimizationOptions } from './promptEngineering';
 
@@ -13,12 +12,14 @@ export interface OptimizationResult {
     original: number;
     optimized: number;
   };
+  domain: string;
 }
 
 export class PromptOptimizer {
   static async optimizePrompt(
     userPrompt: string,
     platform: string,
+    domain: string,
     options: OptimizationOptions
   ): Promise<OptimizationResult> {
     // Get system prompt for platform
@@ -31,9 +32,17 @@ export class PromptOptimizer {
     const appliedTechniques: string[] = [];
     
     // Apply optimization techniques based on options and analysis
-    if (options.useChainOfThought && analysis.complexity !== 'simple') {
+    if (options.useTreeOfThoughts && analysis.complexity === 'expert') {
+      optimizedPrompt = PromptEngineer.applyTreeOfThoughts(optimizedPrompt);
+      appliedTechniques.push('Tree of Thoughts');
+    } else if (options.useChainOfThought && analysis.complexity !== 'simple') {
       optimizedPrompt = PromptEngineer.applyChainOfThought(optimizedPrompt);
       appliedTechniques.push('Chain of Thought');
+    }
+    
+    if (options.useSelfConsistency && analysis.intent === 'problem_solving') {
+      optimizedPrompt = PromptEngineer.applySelfConsistency(optimizedPrompt);
+      appliedTechniques.push('Self Consistency');
     }
     
     if (options.useReAct && analysis.intent === 'problem_solving') {
@@ -41,14 +50,17 @@ export class PromptOptimizer {
       appliedTechniques.push('ReAct Pattern');
     }
     
-    if (options.usePersona) {
-      optimizedPrompt = PromptEngineer.applyPersonaInjection(optimizedPrompt, analysis.domain);
-      appliedTechniques.push('Persona Injection');
+    if (options.useRolePlay && domain !== 'general') {
+      optimizedPrompt = PromptEngineer.applyRolePlay(optimizedPrompt, domain);
+      appliedTechniques.push('Role Playing');
+    } else if (options.usePersona) {
+      optimizedPrompt = PromptEngineer.applyEnhancedPersonaInjection(optimizedPrompt, domain);
+      appliedTechniques.push('Enhanced Persona Injection');
     }
     
     if (options.useFewShot && analysis.complexity === 'complex') {
       // Add few-shot examples based on domain
-      const examples = this.getExamplesForDomain(analysis.domain);
+      const examples = this.getExamplesForDomain(domain);
       if (examples.length > 0) {
         optimizedPrompt = PromptEngineer.applyFewShotLearning(optimizedPrompt, examples);
         appliedTechniques.push('Few-Shot Learning');
@@ -56,8 +68,8 @@ export class PromptOptimizer {
     }
     
     if (options.useConstraints) {
-      optimizedPrompt = this.addConstraints(optimizedPrompt, analysis);
-      appliedTechniques.push('Constraint Integration');
+      optimizedPrompt = this.addAdvancedConstraints(optimizedPrompt, analysis, domain);
+      appliedTechniques.push('Advanced Constraint Integration');
     }
     
     if (options.optimizeForTokens) {
@@ -79,7 +91,8 @@ export class PromptOptimizer {
     const estimatedImprovement = this.calculateImprovementScore(
       analysis,
       appliedTechniques.length,
-      options
+      options,
+      domain
     );
     
     return {
@@ -92,7 +105,8 @@ export class PromptOptimizer {
       tokenCount: {
         original: originalTokens,
         optimized: optimizedTokens
-      }
+      },
+      domain
     };
   }
   
@@ -102,12 +116,20 @@ export class PromptOptimizer {
         {
           input: "Write a function to sort an array",
           output: "```javascript\nfunction sortArray(arr) {\n  return arr.sort((a, b) => a - b);\n}\n```"
+        },
+        {
+          input: "Explain REST API design",
+          output: "REST APIs follow these principles:\n1. Stateless communication\n2. Resource-based URLs\n3. HTTP methods (GET, POST, PUT, DELETE)\n4. JSON data format"
         }
       ],
       creative: [
         {
           input: "Write a short story about time travel",
           output: "The pocket watch ticked backwards as Sarah realized she had exactly thirty minutes to prevent the accident that would change everything..."
+        },
+        {
+          input: "Create a poem about nature",
+          output: "Whispers of wind through ancient trees,\nDancing shadows, rustling leaves,\nNature's symphony plays for free,\nA masterpiece for all to see."
         }
       ],
       business: [
@@ -115,33 +137,51 @@ export class PromptOptimizer {
           input: "Analyze market trends",
           output: "Market Analysis:\n1. Current trends\n2. Growth indicators\n3. Risk factors\n4. Recommendations"
         }
+      ],
+      academic: [
+        {
+          input: "Structure a research paper",
+          output: "Research Paper Structure:\n1. Abstract\n2. Introduction\n3. Literature Review\n4. Methodology\n5. Results\n6. Discussion\n7. Conclusion"
+        }
       ]
     };
     
     return exampleSets[domain as keyof typeof exampleSets] || [];
   }
   
-  private static addConstraints(prompt: string, analysis: PromptAnalysis): string {
+  private static addAdvancedConstraints(prompt: string, analysis: PromptAnalysis, domain: string): string {
     const constraints = [];
     
     if (analysis.complexity === 'expert') {
-      constraints.push("Provide detailed, expert-level explanations");
+      constraints.push("Provide detailed, expert-level explanations with technical depth");
     }
     
     if (analysis.intent === 'creative') {
-      constraints.push("Be original and imaginative while maintaining coherence");
+      constraints.push("Be original and imaginative while maintaining coherence and quality");
     }
     
-    if (analysis.domain === 'technology') {
-      constraints.push("Include code examples where relevant");
+    if (domain === 'technology') {
+      constraints.push("Include code examples, best practices, and technical considerations");
+    }
+    
+    if (domain === 'medical') {
+      constraints.push("Emphasize the importance of professional medical consultation");
+    }
+    
+    if (domain === 'legal') {
+      constraints.push("Include appropriate legal disclaimers and emphasize professional legal advice");
+    }
+    
+    if (analysis.estimatedTokens > 100) {
+      constraints.push("Structure the response with clear sections and headings");
     }
     
     if (constraints.length === 0) return prompt;
     
     return `${prompt}
 
-Constraints:
-${constraints.map(c => `- ${c}`).join('\n')}`;
+Advanced Constraints:
+${constraints.map(c => `• ${c}`).join('\n')}`;
   }
   
   private static integrateSystemPrompt(userPrompt: string, systemPrompt: SystemPrompt): string {
@@ -160,7 +200,8 @@ ${constraints.map(c => `- ${c}`).join('\n')}`;
   private static calculateImprovementScore(
     analysis: PromptAnalysis,
     techniquesApplied: number,
-    options: OptimizationOptions
+    options: OptimizationOptions,
+    domain: string
   ): number {
     let baseScore = 60;
     
@@ -170,12 +211,18 @@ ${constraints.map(c => `- ${c}`).join('\n')}`;
     }
     
     // Add points for each technique applied
-    baseScore += techniquesApplied * 5;
+    baseScore += techniquesApplied * 4;
     
     // Add points for optimization options used
     if (options.useChainOfThought) baseScore += 8;
     if (options.usePersona) baseScore += 6;
     if (options.useReAct) baseScore += 10;
+    if (options.useTreeOfThoughts) baseScore += 12;
+    if (options.useSelfConsistency) baseScore += 9;
+    if (options.useRolePlay) baseScore += 7;
+    
+    // Add points for domain-specific optimization
+    if (domain !== 'general') baseScore += 5;
     
     return Math.min(baseScore, 95);
   }

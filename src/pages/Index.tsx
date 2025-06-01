@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { PromptInput } from "@/components/PromptInput";
 import { PlatformSelector } from "@/components/PlatformSelector";
+import { DomainSelector } from "@/components/DomainSelector";
 import { ProviderSelector } from "@/components/ProviderSelector";
 import { ApiKeyManager } from "@/components/ApiKeyManager";
 import { AdvancedOptimizer } from "@/components/AdvancedOptimizer";
@@ -13,6 +15,7 @@ import { PromptOptimizer, OptimizationResult } from "@/utils/promptOptimizer";
 const Index = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("gpt-4o");
+  const [selectedDomain, setSelectedDomain] = useState("general");
   const [selectedProvider, setSelectedProvider] = useState("groq");
   const [apiKey, setApiKey] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -25,6 +28,9 @@ const Index = () => {
     usePersona: true,
     useConstraints: true,
     optimizeForTokens: false,
+    useTreeOfThoughts: false,
+    useSelfConsistency: false,
+    useRolePlay: false,
   });
   
   const { toast } = useToast();
@@ -40,14 +46,22 @@ const Index = () => {
       
       if (promptAnalysis.complexity === 'complex' || promptAnalysis.complexity === 'expert') {
         suggestedOptions.useChainOfThought = true;
+        suggestedOptions.useTreeOfThoughts = true;
       }
       
       if (promptAnalysis.intent === 'problem_solving') {
         suggestedOptions.useReAct = true;
+        suggestedOptions.useSelfConsistency = true;
       }
       
       if (promptAnalysis.domain !== 'general') {
         suggestedOptions.usePersona = true;
+        suggestedOptions.useRolePlay = true;
+      }
+      
+      // Auto-update domain if detected differently
+      if (promptAnalysis.domain !== selectedDomain && promptAnalysis.confidence > 70) {
+        setSelectedDomain(promptAnalysis.domain);
       }
       
       setOptimizationOptions(suggestedOptions);
@@ -78,10 +92,11 @@ const Index = () => {
     setIsOptimizing(true);
     
     try {
-      // Apply advanced optimization
+      // Apply advanced optimization with domain context
       const result = await PromptOptimizer.optimizePrompt(
         userPrompt,
         selectedPlatform,
+        selectedDomain,
         optimizationOptions
       );
       
@@ -113,7 +128,7 @@ const Index = () => {
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Prompt Input
+                Prompt Configuration
               </h2>
               
               <div className="space-y-4">
@@ -126,6 +141,11 @@ const Index = () => {
                 <PlatformSelector 
                   value={selectedPlatform}
                   onChange={setSelectedPlatform}
+                />
+                
+                <DomainSelector 
+                  value={selectedDomain}
+                  onChange={setSelectedDomain}
                 />
                 
                 <ProviderSelector 
