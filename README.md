@@ -1,6 +1,17 @@
 # AI Prompt Optimizer
 
-This project is a web application designed to help users optimize their AI prompts. It leverages various prompt engineering techniques to enhance clarity, efficiency, and effectiveness of prompts for different AI models and platforms.
+[![MIT License](https://img.shields.io/github/license/Kedhareswer/platform-prompt-alchemy-lab?color=brightgreen)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/Kedhareswer/platform-prompt-alchemy-lab?style=social)](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/stargazers)
+[![Issues](https://img.shields.io/github/issues/Kedhareswer/platform-prompt-alchemy-lab)](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/Kedhareswer/platform-prompt-alchemy-lab)](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/commits/main)
+[![TypeScript](https://img.shields.io/badge/TypeScript-96.3%25-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-UI-blue?logo=react)](https://reactjs.org/)
+
+> **⭐️ If you like this project, please consider [starring the repository](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/stargazers) to support development! ⭐️**
+
+---
+
+This project is a web application designed to help users optimize their AI prompts. It leverages various prompt engineering techniques to enhance clarity, efficiency, and effectiveness of prompts for different AI models.
 
 ## Features
 
@@ -34,7 +45,7 @@ This application streamlines the AI prompt optimization process through the foll
 
 This process helps in crafting more effective and efficient prompts tailored to specific needs.
 
-## How can I edit this code?
+## 🚀 Getting Started
 
 **Use your preferred IDE**
 
@@ -58,9 +69,7 @@ npm i
 npm run dev
 ```
 
-## What technologies are used for this project?
-
-This project is built with:
+## 🛠️ Technologies Used
 
 - Vite
 - TypeScript
@@ -69,7 +78,7 @@ This project is built with:
 - Tailwind CSS
 - TanStack Query (for data fetching and server state management)
 
-## Contributing
+## 🤝 Contributing
 
 Contributions are welcome! If you have suggestions for improvements or want to add new features, please follow these steps:
 
@@ -81,7 +90,12 @@ Contributions are welcome! If you have suggestions for improvements or want to a
 
 Please ensure your code adheres to the existing style and that any new features are well-documented.
 
+## 📄 License
 
-## License
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-This project is currently licensed under [MIT License](https://opensource.org/licenses/MIT).
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+> **⭐️ Don’t forget to [star the repo](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/stargazers) if you find it useful!**
