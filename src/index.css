@@ -6,60 +6,43 @@
   :root {
     --background: 0 0% 98%;
     --foreground: 0 0% 12%;
-
     --card: 0 0% 100%;
     --card-foreground: 0 0% 12%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 12%;
-
     --primary: 0 0% 12%;
     --primary-foreground: 0 0% 98%;
-
     --secondary: 0 0% 96%;
     --secondary-foreground: 0 0% 12%;
-
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
-
     --accent: 0 0% 96%;
     --accent-foreground: 0 0% 12%;
-
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
     --ring: 0 0% 12%;
-
     --radius: 0.5rem;
   }
 
   .dark {
     --background: 0 0% 12%;
     --foreground: 0 0% 98%;
-
     --card: 0 0% 12%;
     --card-foreground: 0 0% 98%;
-
     --popover: 0 0% 12%;
     --popover-foreground: 0 0% 98%;
-
     --primary: 0 0% 98%;
     --primary-foreground: 0 0% 12%;
-
     --secondary: 0 0% 18%;
     --secondary-foreground: 0 0% 98%;
-
     --muted: 0 0% 18%;
     --muted-foreground: 0 0% 63.9%;
-
     --accent: 0 0% 18%;
     --accent-foreground: 0 0% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 0 0% 18%;
     --input: 0 0% 18%;
     --ring: 0 0% 83.9%;
@@ -70,121 +53,181 @@
   * {
     @apply border-border;
   }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Improved focus styles for better accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+
+  /* Enhanced keyboard navigation indicators */
+  :focus {
+    @apply outline-none;
   }
 }
 
-/* Sketch theme styles */
+/* Refined sketch theme styles */
 .sketch-border {
-  @apply relative;
+  @apply relative transition-shadow duration-200;
   border-style: solid;
   border-width: 2px;
   border-color: theme(colors.foreground / 90%);
-  box-shadow: 2px 2px 0 theme(colors.foreground / 10%);
+  box-shadow: 
+    2px 2px 0 theme(colors.foreground / 10%),
+    4px 4px 0 theme(colors.background);
 }
 
-.sketch-border::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  border: 1px solid theme(colors.foreground / 20%);
-  border-radius: calc(var(--radius) + 2px);
+.sketch-border:hover {
+  box-shadow: 
+    1px 1px 0 theme(colors.foreground / 10%),
+    2px 2px 0 theme(colors.background);
+  transform: translate(1px, 1px);
 }
 
 .sketch-card {
-  @apply bg-card rounded-lg border-2 border-foreground/90 relative overflow-hidden;
+  @apply bg-card rounded-lg border-2 border-foreground/90 relative overflow-hidden transition-all duration-200;
   box-shadow: 
     2px 2px 0 theme(colors.foreground / 10%),
     4px 4px 0 theme(colors.background),
     6px 6px 0 theme(colors.foreground / 10%);
 }
 
-.sketch-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    45deg,
-    theme(colors.foreground / 2%),
-    theme(colors.foreground / 2%) 2px,
-    transparent 2px,
-    transparent 8px
-  );
+.sketch-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    3px 3px 0 theme(colors.foreground / 10%),
+    6px 6px 0 theme(colors.background),
+    8px 8px 0 theme(colors.foreground / 10%);
 }
 
 .sketch-input {
-  @apply bg-background border-2 border-foreground/90 rounded-md px-3 py-2;
+  @apply bg-background border-2 border-foreground/90 rounded-md px-4 py-2 w-full
+    transition-all duration-200 placeholder:text-foreground/50
+    focus:border-primary focus:ring-2 focus:ring-primary/20;
   box-shadow: 2px 2px 0 theme(colors.foreground / 10%);
 }
 
 .sketch-button {
-  @apply relative inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-    disabled:opacity-50 disabled:pointer-events-none;
-  background: repeating-linear-gradient(
-    45deg,
-    theme(colors.foreground),
-    theme(colors.foreground) 2px,
-    theme(colors.background) 2px,
-    theme(colors.background) 4px
-  );
+  @apply relative inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium
+    transition-all duration-200 select-none
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
+    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none;
+  padding: 0.5rem 1rem;
+  background: theme(colors.background);
   border: 2px solid theme(colors.foreground / 90%);
   box-shadow: 2px 2px 0 theme(colors.foreground / 10%);
 }
 
-.sketch-button:hover {
+.sketch-button:hover:not(:disabled) {
   transform: translate(1px, 1px);
   box-shadow: 1px 1px 0 theme(colors.foreground / 10%);
 }
 
+.sketch-button:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
 .sketch-select {
-  @apply bg-background border-2 border-foreground/90 rounded-md;
+  @apply bg-background border-2 border-foreground/90 rounded-md w-full
+    transition-all duration-200
+    focus:border-primary focus:ring-2 focus:ring-primary/20;
   box-shadow: 2px 2px 0 theme(colors.foreground / 10%);
 }
 
-/* Paper texture */
+/* Refined paper texture */
 .paper-texture {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+  background-color: theme(colors.background);
+  background-image: 
+    linear-gradient(theme(colors.foreground / 2%) 1px, transparent 1px),
+    linear-gradient(90deg, theme(colors.foreground / 2%) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
-/* Hand-drawn animations */
+/* Enhanced animations */
 @keyframes sketch-in {
   0% {
     opacity: 0;
-    transform: scale(0.96) rotate(-2deg);
+    transform: scale(0.97) translateY(10px);
   }
   100% {
     opacity: 1;
-    transform: scale(1) rotate(0);
+    transform: scale(1) translateY(0);
   }
 }
 
 .sketch-animate-in {
-  animation: sketch-in 0.3s ease-out forwards;
+  animation: sketch-in 0.4s ease-out forwards;
+  will-change: transform, opacity;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Accessible custom scrollbar */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: theme(colors.background);
+    border-left: 2px dashed theme(colors.foreground / 20%);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: theme(colors.foreground / 30%);
+    border: 3px solid theme(colors.background);
+    border-radius: 6px;
+    min-height: 40px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: theme(colors.foreground / 40%);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }
 
-::-webkit-scrollbar-track {
-  background: theme(colors.background);
-  border-left: 1px dashed theme(colors.foreground / 20%);
+/* Utility classes for sketch theme */
+.sketch-divider {
+  @apply w-full h-px my-4 bg-foreground/20;
+  background-image: repeating-linear-gradient(
+    90deg,
+    theme(colors.foreground / 20%),
+    theme(colors.foreground / 20%) 4px,
+    transparent 4px,
+    transparent 8px
+  );
 }
 
-::-webkit-scrollbar-thumb {
-  background: theme(colors.foreground / 20%);
-  border: 2px solid theme(colors.background);
-  border-radius: 4px;
+.sketch-label {
+  @apply block text-sm font-medium mb-1 select-none;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: theme(colors.foreground / 30%);
+/* Loading states */
+.sketch-loading {
+  @apply relative overflow-hidden;
+}
+
+.sketch-loading::after {
+  content: "";
+  @apply absolute inset-0 bg-foreground/5;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    theme(colors.foreground / 2%) 10px,
+    theme(colors.foreground / 2%) 20px
+  );
+  animation: loading 1s linear infinite;
+}
+
+@keyframes loading {
+  from { background-position: 0 0; }
+  to { background-position: 40px 0; }
 }

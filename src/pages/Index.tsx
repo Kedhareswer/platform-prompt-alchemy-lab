@@ -34,13 +34,11 @@ const Index = () => {
   
   const { toast } = useToast();
 
-  // Analyze prompt whenever it changes
   useEffect(() => {
     if (userPrompt.trim()) {
       const promptAnalysis = PromptEngineer.analyzePrompt(userPrompt);
       setAnalysis(promptAnalysis);
       
-      // Auto-suggest optimization techniques based on analysis
       const suggestedOptions = { ...optimizationOptions };
       
       if (promptAnalysis.complexity === 'complex' || promptAnalysis.complexity === 'expert') {
@@ -58,7 +56,6 @@ const Index = () => {
         suggestedOptions.useRolePlay = true;
       }
       
-      // Auto-update domain if detected differently
       if (promptAnalysis.domain !== selectedDomain && promptAnalysis.confidence > 70) {
         setSelectedDomain(promptAnalysis.domain);
       }
@@ -91,7 +88,6 @@ const Index = () => {
     setIsOptimizing(true);
     
     try {
-      // Apply advanced optimization with domain context
       const result = await PromptOptimizer.optimizePrompt(
         userPrompt,
         selectedPlatform,
@@ -118,47 +114,32 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 relative overflow-hidden">
-      {/* Sketch-style background elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-20 left-10 w-32 h-32 border-2 border-gray-400 rounded-full transform rotate-12 border-dashed"></div>
-        <div className="absolute top-40 right-20 w-24 h-24 border-2 border-gray-400 transform -rotate-45 border-dotted"></div>
-        <div className="absolute bottom-32 left-1/4 w-16 h-16 border-2 border-gray-400 rounded-lg transform rotate-45"></div>
-        <div className="absolute bottom-20 right-1/3 w-20 h-20 border-2 border-gray-400 rounded-full transform -rotate-12 border-dashed"></div>
-      </div>
-      
-      {/* Hand-drawn style lines */}
-      <div className="absolute inset-0 opacity-5">
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <path d="M50,300 Q200,100 350,300 T650,300" stroke="#374151" strokeWidth="2" fill="none" strokeDasharray="5,5"/>
-          <path d="M100,150 Q300,50 500,150 T900,150" stroke="#374151" strokeWidth="2" fill="none" strokeDasharray="3,7"/>
-          <path d="M0,500 Q200,400 400,500 T800,500" stroke="#374151" strokeWidth="1" fill="none" strokeDasharray="8,3"/>
-        </svg>
+    <div className="min-h-screen bg-background paper-texture">
+      {/* Decorative elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-10 left-10 w-32 h-32 border-2 border-foreground/20 rounded-full transform rotate-12"></div>
+        <div className="absolute bottom-20 right-20 w-40 h-40 border-2 border-foreground/20 transform -rotate-6"></div>
+        <div className="absolute top-1/3 right-1/4 w-24 h-24 border-2 border-foreground/20 rounded-lg transform rotate-45"></div>
       </div>
 
       <Header />
       
-      <main className="container mx-auto px-4 py-8 relative z-10">
+      <main className="container mx-auto px-4 py-8 relative">
         <div className="grid lg:grid-cols-12 gap-6">
-          {/* Left Column - Input & Basic Settings */}
+          {/* Left Column */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border-2 border-gray-200 relative transform hover:rotate-1 transition-transform duration-300">
-              {/* Sketch-style corner decorations */}
-              <div className="absolute -top-2 -left-2 w-4 h-4 border-2 border-orange-400 rounded-full bg-orange-100"></div>
-              <div className="absolute -top-2 -right-2 w-4 h-4 border-2 border-blue-400 rounded-full bg-blue-100"></div>
-              <div className="absolute -bottom-2 -left-2 w-4 h-4 border-2 border-green-400 rounded-full bg-green-100"></div>
-              <div className="absolute -bottom-2 -right-2 w-4 h-4 border-2 border-purple-400 rounded-full bg-purple-100"></div>
-              
-              <h2 className="text-xl font-bold text-gray-800 mb-4 relative">
-                <span className="relative z-10">Prompt Configuration</span>
-                <div className="absolute -bottom-1 left-0 w-full h-2 bg-yellow-200 opacity-60 transform -skew-x-12"></div>
+            <div className="sketch-card p-6 sketch-animate-in">
+              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <span className="w-2 h-2 bg-foreground rounded-full"></span>
+                Prompt Configuration
+                <span className="w-2 h-2 bg-foreground rounded-full"></span>
               </h2>
               
               <div className="space-y-4">
                 <PromptInput 
                   value={userPrompt}
                   onChange={setUserPrompt}
-                  placeholder="Enter your prompt here for advanced optimization..."
+                  placeholder="Enter your prompt here..."
                 />
                 
                 <PlatformSelector 
@@ -184,8 +165,7 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Advanced Optimizer Controls */}
-            <div className="transform hover:-rotate-1 transition-transform duration-300">
+            <div className="sketch-animate-in" style={{ animationDelay: "0.1s" }}>
               <AdvancedOptimizer
                 analysis={analysis}
                 options={optimizationOptions}
@@ -196,9 +176,9 @@ const Index = () => {
             </div>
           </div>
           
-          {/* Right Column - Results */}
+          {/* Right Column */}
           <div className="lg:col-span-8">
-            <div className="transform hover:rotate-1 transition-transform duration-300">
+            <div className="sketch-animate-in" style={{ animationDelay: "0.2s" }}>
               <OptimizationResults result={optimizationResult} />
             </div>
           </div>
