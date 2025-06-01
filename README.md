@@ -81,7 +81,6 @@ Contributions are welcome! If you have suggestions for improvements or want to a
 
 Please ensure your code adheres to the existing style and that any new features are well-documented.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
 
 ## License
 
