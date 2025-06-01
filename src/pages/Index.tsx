@@ -1,21 +1,61 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { PromptInput } from "@/components/PromptInput";
 import { PlatformSelector } from "@/components/PlatformSelector";
 import { ProviderSelector } from "@/components/ProviderSelector";
-import { OptimizedOutput } from "@/components/OptimizedOutput";
 import { ApiKeyManager } from "@/components/ApiKeyManager";
+import { AdvancedOptimizer } from "@/components/AdvancedOptimizer";
+import { OptimizationResults } from "@/components/OptimizationResults";
 import { useToast } from "@/hooks/use-toast";
+import { PromptEngineer, OptimizationOptions, PromptAnalysis } from "@/utils/promptEngineering";
+import { PromptOptimizer, OptimizationResult } from "@/utils/promptOptimizer";
 
 const Index = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("gpt-4o");
   const [selectedProvider, setSelectedProvider] = useState("groq");
   const [apiKey, setApiKey] = useState("");
-  const [optimizedPrompt, setOptimizedPrompt] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
+  const [analysis, setAnalysis] = useState<PromptAnalysis | null>(null);
+  const [optimizationResult, setOptimizationResult] = useState<OptimizationResult | null>(null);
+  const [optimizationOptions, setOptimizationOptions] = useState<OptimizationOptions>({
+    useChainOfThought: true,
+    useFewShot: false,
+    useReAct: false,
+    usePersona: true,
+    useConstraints: true,
+    optimizeForTokens: false,
+  });
+  
   const { toast } = useToast();
+
+  // Analyze prompt whenever it changes
+  useEffect(() => {
+    if (userPrompt.trim()) {
+      const promptAnalysis = PromptEngineer.analyzePrompt(userPrompt);
+      setAnalysis(promptAnalysis);
+      
+      // Auto-suggest optimization techniques based on analysis
+      const suggestedOptions = { ...optimizationOptions };
+      
+      if (promptAnalysis.complexity === 'complex' || promptAnalysis.complexity === 'expert') {
+        suggestedOptions.useChainOfThought = true;
+      }
+      
+      if (promptAnalysis.intent === 'problem_solving') {
+        suggestedOptions.useReAct = true;
+      }
+      
+      if (promptAnalysis.domain !== 'general') {
+        suggestedOptions.usePersona = true;
+      }
+      
+      setOptimizationOptions(suggestedOptions);
+    } else {
+      setAnalysis(null);
+    }
+  }, [userPrompt]);
 
   const handleOptimize = async () => {
     if (!userPrompt.trim()) {
@@ -39,27 +79,21 @@ const Index = () => {
     setIsOptimizing(true);
     
     try {
-      // Simulate API call for now - will be replaced with actual implementation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Apply advanced optimization
+      const result = await PromptOptimizer.optimizePrompt(
+        userPrompt,
+        selectedPlatform,
+        optimizationOptions
+      );
       
-      // Mock optimized prompt based on platform
-      const platformTemplates = {
-        "gpt-4o": "You are an expert AI assistant. Please provide a comprehensive and detailed response to the following request:",
-        "claude": "I need you to think step by step and provide a thorough analysis of:",
-        "gemini": "Please approach this systematically and consider multiple perspectives when addressing:",
-        "llama": "Let's work through this methodically. I want you to focus on:",
-      };
-      
-      const template = platformTemplates[selectedPlatform as keyof typeof platformTemplates];
-      const optimized = `${template}\n\n${userPrompt}\n\nPlease ensure your response is well-structured, accurate, and provides actionable insights where applicable.`;
-      
-      setOptimizedPrompt(optimized);
+      setOptimizationResult(result);
       
       toast({
         title: "Success",
-        description: "Prompt optimized successfully!",
+        description: `Prompt optimized with ${result.appliedTechniques.length} techniques applied!`,
       });
     } catch (error) {
+      console.error('Optimization error:', error);
       toast({
         title: "Error",
         description: "Failed to optimize prompt. Please try again.",
@@ -75,19 +109,19 @@ const Index = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Input Section */}
-          <div className="space-y-6">
+        <div className="grid lg:grid-cols-12 gap-6">
+          {/* Left Column - Input & Basic Settings */}
+          <div className="lg:col-span-4 space-y-6">
             <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-                Create Your Prompt
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Prompt Input
               </h2>
               
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <PromptInput 
                   value={userPrompt}
                   onChange={setUserPrompt}
-                  placeholder="Enter your prompt here..."
+                  placeholder="Enter your prompt here for advanced optimization..."
                 />
                 
                 <PlatformSelector 
@@ -105,25 +139,22 @@ const Index = () => {
                   apiKey={apiKey}
                   onChange={setApiKey}
                 />
-                
-                <button
-                  onClick={handleOptimize}
-                  disabled={isOptimizing}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isOptimizing ? "Optimizing..." : "Optimize Prompt"}
-                </button>
               </div>
             </div>
+
+            {/* Advanced Optimizer Controls */}
+            <AdvancedOptimizer
+              analysis={analysis}
+              options={optimizationOptions}
+              onOptionsChange={setOptimizationOptions}
+              onOptimize={handleOptimize}
+              isOptimizing={isOptimizing}
+            />
           </div>
           
-          {/* Output Section */}
-          <div>
-            <OptimizedOutput 
-              content={optimizedPrompt}
-              isLoading={isOptimizing}
-              platform={selectedPlatform}
-            />
+          {/* Right Column - Results */}
+          <div className="lg:col-span-8">
+            <OptimizationResults result={optimizationResult} />
           </div>
         </div>
       </main>
