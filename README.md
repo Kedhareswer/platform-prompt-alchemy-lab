@@ -84,4 +84,4 @@ Please ensure your code adheres to the existing style and that any new features 
 
 ## License
 
-This project is currently not licensed. Consider adding an open-source license like the [MIT License](https://opensource.org/licenses/MIT) if you wish to share it widely.
+This project is currently licensed under [MIT License](https://opensource.org/licenses/MIT).
