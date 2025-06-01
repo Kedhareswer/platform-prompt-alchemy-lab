@@ -1,78 +1,68 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 98%;
+    --foreground: 0 0% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 0% 12%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 12%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 12%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 12%;
 
     --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --background: 0 0% 12%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 12%;
+
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 63.9%;
+
+    --accent: 0 0% 18%;
+    --accent-foreground: 0 0% 98%;
+
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 83.9%;
   }
 }
 
@@ -80,58 +70,121 @@
   * {
     @apply border-border;
   }
-
   body {
     @apply bg-background text-foreground;
-    /* Add subtle paper texture */
-    background-image: 
-      radial-gradient(circle at 20% 80%, rgba(120, 120, 120, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(120, 120, 120, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 40% 40%, rgba(120, 120, 120, 0.03) 0%, transparent 50%);
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-/* Custom sketch-style animations */
-@keyframes sketch-draw {
+/* Sketch theme styles */
+.sketch-border {
+  @apply relative;
+  border-style: solid;
+  border-width: 2px;
+  border-color: theme(colors.foreground / 90%);
+  box-shadow: 2px 2px 0 theme(colors.foreground / 10%);
+}
+
+.sketch-border::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 1px solid theme(colors.foreground / 20%);
+  border-radius: calc(var(--radius) + 2px);
+}
+
+.sketch-card {
+  @apply bg-card rounded-lg border-2 border-foreground/90 relative overflow-hidden;
+  box-shadow: 
+    2px 2px 0 theme(colors.foreground / 10%),
+    4px 4px 0 theme(colors.background),
+    6px 6px 0 theme(colors.foreground / 10%);
+}
+
+.sketch-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    theme(colors.foreground / 2%),
+    theme(colors.foreground / 2%) 2px,
+    transparent 2px,
+    transparent 8px
+  );
+}
+
+.sketch-input {
+  @apply bg-background border-2 border-foreground/90 rounded-md px-3 py-2;
+  box-shadow: 2px 2px 0 theme(colors.foreground / 10%);
+}
+
+.sketch-button {
+  @apply relative inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+    disabled:opacity-50 disabled:pointer-events-none;
+  background: repeating-linear-gradient(
+    45deg,
+    theme(colors.foreground),
+    theme(colors.foreground) 2px,
+    theme(colors.background) 2px,
+    theme(colors.background) 4px
+  );
+  border: 2px solid theme(colors.foreground / 90%);
+  box-shadow: 2px 2px 0 theme(colors.foreground / 10%);
+}
+
+.sketch-button:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 theme(colors.foreground / 10%);
+}
+
+.sketch-select {
+  @apply bg-background border-2 border-foreground/90 rounded-md;
+  box-shadow: 2px 2px 0 theme(colors.foreground / 10%);
+}
+
+/* Paper texture */
+.paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* Hand-drawn animations */
+@keyframes sketch-in {
   0% {
-    stroke-dasharray: 0 100;
+    opacity: 0;
+    transform: scale(0.96) rotate(-2deg);
   }
   100% {
-    stroke-dasharray: 100 0;
+    opacity: 1;
+    transform: scale(1) rotate(0);
   }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-10px) rotate(2deg);
-  }
+.sketch-animate-in {
+  animation: sketch-in 0.3s ease-out forwards;
 }
 
-@keyframes sketch-wiggle {
-  0%, 100% {
-    transform: rotate(-1deg);
-  }
-  50% {
-    transform: rotate(1deg);
-  }
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-/* Custom utility classes for sketch theme */
-@layer utilities {
-  .sketch-border {
-    border-image: url("data:image/svg+xml,%3csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M5,5 Q25,2 45,5 T85,5 Q95,15 95,25 T95,75 Q85,95 75,95 T25,95 Q5,85 5,75 T5,25 Q15,5 25,5' stroke='%23374151' stroke-width='2' fill='none'/%3e%3c/svg%3e") 30;
-  }
-  
-  .sketch-shadow {
-    filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.1)) drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.1));
-  }
-  
-  .paper-texture {
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, rgba(0, 0, 0, 0.05) 0%, transparent 50%);
-  }
+::-webkit-scrollbar-track {
+  background: theme(colors.background);
+  border-left: 1px dashed theme(colors.foreground / 20%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme(colors.foreground / 20%);
+  border: 2px solid theme(colors.background);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme(colors.foreground / 30%);
 }
