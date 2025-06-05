@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
@@ -67,12 +68,14 @@ export function Gauge({
   const progress = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
   const offset = circumference - (progress / 100) * circumference;
 
+  // Separate div props from svg props
+  const { onCopy, onCut, onPaste, onCompositionEnd, onCompositionStart, onCompositionUpdate, ...divProps } = props;
+
   return (
-    <div className="relative inline-flex items-center justify-center">
+    <div className="relative inline-flex items-center justify-center" {...divProps}>
       <svg
         className={cn(gaugeVariants({ size, className }))}
         viewBox="0 0 100 100"
-        {...props}
       >
         {/* Background circle */}
         <circle

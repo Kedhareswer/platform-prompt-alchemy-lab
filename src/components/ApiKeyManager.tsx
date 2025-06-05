@@ -29,9 +29,28 @@ export const ApiKeyManager = ({ provider, apiKey, onChange }: ApiKeyManagerProps
       url: "https://dashboard.cohere.ai/api-keys",
       placeholder: "co_...",
     },
+    openai: {
+      name: "OpenAI",
+      url: "https://platform.openai.com/api-keys",
+      placeholder: "sk-...",
+    },
+    anthropic: {
+      name: "Anthropic",
+      url: "https://console.anthropic.com/",
+      placeholder: "sk-ant-...",
+    },
+    google: {
+      name: "Google AI",
+      url: "https://makersuite.google.com/app/apikey",
+      placeholder: "AI...",
+    },
   };
 
-  const info = providerInfo[provider as keyof typeof providerInfo];
+  const info = providerInfo[provider as keyof typeof providerInfo] || {
+    name: provider.charAt(0).toUpperCase() + provider.slice(1),
+    url: "#",
+    placeholder: "Enter API key...",
+  };
 
   return (
     <div className="space-y-2">
@@ -39,15 +58,17 @@ export const ApiKeyManager = ({ provider, apiKey, onChange }: ApiKeyManagerProps
         <Label className="text-sm font-medium text-gray-700">
           {info.name} API Key
         </Label>
-        <a
-          href={info.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800"
-        >
-          <span>Get API Key</span>
-          <ExternalLink className="w-3 h-3" />
-        </a>
+        {info.url !== "#" && (
+          <a
+            href={info.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center space-x-1 text-xs text-blue-600 hover:text-blue-800"
+          >
+            <span>Get API Key</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        )}
       </div>
       <div className="relative">
         <Input
