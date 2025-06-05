@@ -1,4 +1,5 @@
 import { PenTool, Github, ExternalLink } from "lucide-react";
+import { LanguageSelector } from "./LanguageSelector";
 
 export const Header = () => {
   return (
@@ -19,6 +20,9 @@ export const Header = () => {
           </a>
           
           <div className="flex items-center gap-4">
+            <div className="flex items-center border-r border-foreground/20 pr-4 mr-2">
+              <LanguageSelector />
+            </div>
             <a
               href="https://github.com/jujumilk3/leaked-system-prompts"
               target="_blank"

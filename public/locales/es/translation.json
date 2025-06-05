@@ -1,0 +1,68 @@
+{
+  "app": {
+    "title": "Optimizador de Prompts de IA",
+    "description": "Mejora tus prompts de IA para obtener mejores resultados",
+    "loading": "Cargando..."
+  },
+  "prompt": {
+    "inputLabel": "Ingresa tu prompt",
+    "inputPlaceholder": "Escribe o pega tu prompt aquí...",
+    "analyze": "Analizar",
+    "optimize": "Optimizar",
+    "copy": "Copiar al Portapapeles",
+    "clear": "Limpiar",
+    "quality": {
+      "title": "Calidad del Prompt",
+      "clarity": "Claridad",
+      "clarityDescription": "Qué tan claro y comprensible es tu prompt",
+      "specificity": "Especificidad",
+      "specificityDescription": "Qué tan específico y detallado es tu prompt",
+      "effectiveness": "Efectividad",
+      "effectivenessDescription": "Qué tan probable es que tu prompt produzca buenos resultados",
+      "issues": "Posibles Problemas",
+      "suggestions": "Sugerencias de Mejora",
+      "excellent": "Excelente",
+      "good": "Bueno",
+      "fair": "Aceptable",
+      "needsWork": "Necesita Mejoras",
+      "enterPrompt": "Ingresa un prompt para ver el análisis de calidad"
+    }
+  },
+  "optimization": {
+    "title": "Resultados de Optimización",
+    "original": "Prompt Original",
+    "optimized": "Prompt Optimizado",
+    "improvement": "Puntuación de Mejora",
+    "tokensSaved": "Tokens Ahorrados",
+    "techniquesApplied": "Técnicas Aplicadas"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "theme": "Tema",
+    "accessibility": "Accesibilidad",
+    "highContrast": "Modo Alto Contraste",
+    "fontSize": "Tamaño de Fuente",
+    "reset": "Restablecer Valores Predeterminados"
+  },
+  "languages": {
+    "en": "Inglés",
+    "es": "Español",
+    "fr": "Francés"
+  },
+  "errors": {
+    "emptyPrompt": "Por favor ingresa un prompt para analizar",
+    "apiError": "Ocurrió un error. Por favor inténtalo de nuevo.",
+    "networkError": "Error de red. Por favor verifica tu conexión."
+  },
+  "accessibility": {
+    "skipToContent": "Saltar al contenido principal",
+    "aria": {
+      "promptInput": "Ingresa tu prompt de IA",
+      "analyzeButton": "Analizar calidad del prompt",
+      "optimizeButton": "Optimizar prompt",
+      "copyButton": "Copiar al portapapeles",
+      "clearButton": "Limpiar entrada"
+    }
+  }
+}

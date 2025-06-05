@@ -1,0 +1,68 @@
+{
+  "app": {
+    "title": "AI Prompt Optimizer",
+    "description": "Enhance your AI prompts for better results",
+    "loading": "Loading..."
+  },
+  "prompt": {
+    "inputLabel": "Enter your prompt",
+    "inputPlaceholder": "Type or paste your prompt here...",
+    "analyze": "Analyze",
+    "optimize": "Optimize",
+    "copy": "Copy to Clipboard",
+    "clear": "Clear",
+    "quality": {
+      "title": "Prompt Quality",
+      "clarity": "Clarity",
+      "clarityDescription": "How clear and understandable your prompt is",
+      "specificity": "Specificity",
+      "specificityDescription": "How specific and detailed your prompt is",
+      "effectiveness": "Effectiveness",
+      "effectivenessDescription": "How likely your prompt will produce good results",
+      "issues": "Potential Issues",
+      "suggestions": "Suggestions for Improvement",
+      "excellent": "Excellent",
+      "good": "Good",
+      "fair": "Fair",
+      "needsWork": "Needs Work",
+      "enterPrompt": "Enter a prompt to see quality analysis"
+    }
+  },
+  "optimization": {
+    "title": "Optimization Results",
+    "original": "Original Prompt",
+    "optimized": "Optimized Prompt",
+    "improvement": "Improvement Score",
+    "tokensSaved": "Tokens Saved",
+    "techniquesApplied": "Techniques Applied"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "accessibility": "Accessibility",
+    "highContrast": "High Contrast Mode",
+    "fontSize": "Font Size",
+    "reset": "Reset to Defaults"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French"
+  },
+  "errors": {
+    "emptyPrompt": "Please enter a prompt to analyze",
+    "apiError": "An error occurred. Please try again.",
+    "networkError": "Network error. Please check your connection."
+  },
+  "accessibility": {
+    "skipToContent": "Skip to main content",
+    "aria": {
+      "promptInput": "Enter your AI prompt",
+      "analyzeButton": "Analyze prompt quality",
+      "optimizeButton": "Optimize prompt",
+      "copyButton": "Copy to clipboard",
+      "clearButton": "Clear input"
+    }
+  }
+}

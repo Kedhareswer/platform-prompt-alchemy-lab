@@ -1,0 +1,68 @@
+{
+  "app": {
+    "title": "Optimisateur de Prompts IA",
+    "description": "Améliorez vos prompts IA pour de meilleurs résultats",
+    "loading": "Chargement..."
+  },
+  "prompt": {
+    "inputLabel": "Saisissez votre prompt",
+    "inputPlaceholder": "Tapez ou collez votre prompt ici...",
+    "analyze": "Analyser",
+    "optimize": "Optimiser",
+    "copy": "Copier dans le Presse-papiers",
+    "clear": "Effacer",
+    "quality": {
+      "title": "Qualité du Prompt",
+      "clarity": "Clarté",
+      "clarityDescription": "Dans quelle mesure votre prompt est clair et compréhensible",
+      "specificity": "Spécificité",
+      "specificityDescription": "Dans quelle mesure votre prompt est spécifique et détaillé",
+      "effectiveness": "Efficacité",
+      "effectivenessDescription": "Probabilité que votre prompt produise de bons résultats",
+      "issues": "Problèmes Potentiels",
+      "suggestions": "Suggestions d'Amélioration",
+      "excellent": "Excellent",
+      "good": "Bon",
+      "fair": "Moyen",
+      "needsWork": "À Améliorer",
+      "enterPrompt": "Saisissez un prompt pour voir l'analyse de qualité"
+    }
+  },
+  "optimization": {
+    "title": "Résultats d'Optimisation",
+    "original": "Prompt Original",
+    "optimized": "Prompt Optimisé",
+    "improvement": "Score d'Amélioration",
+    "tokensSaved": "Jetons Économisés",
+    "techniquesApplied": "Techniques Appliquées"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "theme": "Thème",
+    "accessibility": "Accessibilité",
+    "highContrast": "Mode Contraste Élevé",
+    "fontSize": "Taille de Police",
+    "reset": "Réinitialiser les Paramètres"
+  },
+  "languages": {
+    "en": "Anglais",
+    "es": "Espagnol",
+    "fr": "Français"
+  },
+  "errors": {
+    "emptyPrompt": "Veuillez saisir un prompt à analyser",
+    "apiError": "Une erreur est survenue. Veuillez réessayer.",
+    "networkError": "Erreur de réseau. Veuillez vérifier votre connexion."
+  },
+  "accessibility": {
+    "skipToContent": "Aller au contenu principal",
+    "aria": {
+      "promptInput": "Saisissez votre prompt IA",
+      "analyzeButton": "Analyser la qualité du prompt",
+      "optimizeButton": "Optimiser le prompt",
+      "copyButton": "Copier dans le presse-papiers",
+      "clearButton": "Effacer la saisie"
+    }
+  }
+}

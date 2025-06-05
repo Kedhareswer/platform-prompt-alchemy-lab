@@ -15,6 +15,8 @@ interface AdvancedOptimizerProps {
   onOptionsChange: (options: OptimizationOptions) => void;
   onOptimize: () => void;
   isOptimizing: boolean;
+  'aria-busy'?: boolean;
+  'aria-live'?: 'off' | 'assertive' | 'polite' | undefined;
 }
 
 export const AdvancedOptimizer = ({ 
@@ -22,7 +24,9 @@ export const AdvancedOptimizer = ({
   options, 
   onOptionsChange, 
   onOptimize, 
-  isOptimizing 
+  isOptimizing,
+  'aria-busy': ariaBusy = false,
+  'aria-live': ariaLive = 'polite'
 }: AdvancedOptimizerProps) => {
   const [activeTab, setActiveTab] = useState("techniques");
 
@@ -55,7 +59,12 @@ export const AdvancedOptimizer = ({
   };
 
   return (
-    <Card className="w-full">
+    <Card 
+      className="w-full"
+      aria-busy={ariaBusy}
+      aria-live={ariaLive}
+      aria-atomic="true"
+    >
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <Brain className="w-5 h-5 text-blue-600" />
@@ -63,14 +72,47 @@ export const AdvancedOptimizer = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
-            <TabsTrigger value="techniques">Techniques</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          orientation="horizontal"
+          activationMode="automatic"
+        >
+          <TabsList 
+            className="grid w-full grid-cols-3"
+            aria-label="Optimization settings sections"
+          >
+            <TabsTrigger 
+              value="analysis"
+              aria-controls="analysis-content"
+              id="analysis-tab"
+            >
+              AI Analysis
+            </TabsTrigger>
+            <TabsTrigger 
+              value="techniques"
+              aria-controls="techniques-content"
+              id="techniques-tab"
+            >
+              Techniques
+            </TabsTrigger>
+            <TabsTrigger 
+              value="settings"
+              aria-controls="settings-content"
+              id="settings-tab"
+            >
+              Settings
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="analysis" className="space-y-4">
+          <TabsContent 
+            value="analysis" 
+            id="analysis-content"
+            role="tabpanel"
+            aria-labelledby="analysis-tab"
+            className="space-y-4"
+            tabIndex={0}
+          >
             {analysis ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -122,7 +164,14 @@ export const AdvancedOptimizer = ({
             )}
           </TabsContent>
 
-          <TabsContent value="techniques" className="space-y-4">
+          <TabsContent 
+            value="techniques" 
+            id="techniques-content"
+            role="tabpanel"
+            aria-labelledby="techniques-tab"
+            className="space-y-4"
+            tabIndex={0}
+          >
             <div className="space-y-4">
               <div className="space-y-3">
                 <h4 className="font-medium text-sm text-gray-700">Reasoning Techniques</h4>
@@ -130,11 +179,13 @@ export const AdvancedOptimizer = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Brain className="w-4 h-4" />
-                    <Label>Chain of Thought</Label>
+                    <Label id="chain-of-thought-label" htmlFor="chain-of-thought">Chain of Thought</Label>
                   </div>
                   <Switch
+                    id="chain-of-thought"
                     checked={options.useChainOfThought}
                     onCheckedChange={(checked) => updateOption('useChainOfThought', checked)}
+                    aria-labelledby="chain-of-thought-label"
                   />
                 </div>
                 <p className="text-xs text-gray-500 ml-6">
@@ -144,11 +195,13 @@ export const AdvancedOptimizer = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <TreePine className="w-4 h-4" />
-                    <Label>Tree of Thoughts</Label>
+                    <Label id="tree-of-thoughts-label" htmlFor="tree-of-thoughts">Tree of Thoughts</Label>
                   </div>
                   <Switch
+                    id="tree-of-thoughts"
                     checked={options.useTreeOfThoughts}
                     onCheckedChange={(checked) => updateOption('useTreeOfThoughts', checked)}
+                    aria-labelledby="tree-of-thoughts-label"
                   />
                 </div>
                 <p className="text-xs text-gray-500 ml-6">
@@ -158,11 +211,13 @@ export const AdvancedOptimizer = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <GitBranch className="w-4 h-4" />
-                    <Label>Self Consistency</Label>
+                    <Label id="self-consistency-label" htmlFor="self-consistency">Self Consistency</Label>
                   </div>
                   <Switch
+                    id="self-consistency"
                     checked={options.useSelfConsistency}
                     onCheckedChange={(checked) => updateOption('useSelfConsistency', checked)}
+                    aria-labelledby="self-consistency-label"
                   />
                 </div>
                 <p className="text-xs text-gray-500 ml-6">
@@ -172,11 +227,13 @@ export const AdvancedOptimizer = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Zap className="w-4 h-4" />
-                    <Label>ReAct Pattern</Label>
+                    <Label id="react-pattern-label" htmlFor="react-pattern">ReAct Pattern</Label>
                   </div>
                   <Switch
+                    id="react-pattern"
                     checked={options.useReAct}
                     onCheckedChange={(checked) => updateOption('useReAct', checked)}
+                    aria-labelledby="react-pattern-label"
                   />
                 </div>
                 <p className="text-xs text-gray-500 ml-6">
@@ -190,11 +247,13 @@ export const AdvancedOptimizer = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Cpu className="w-4 h-4" />
-                    <Label>Enhanced Persona</Label>
+                    <Label id="enhanced-persona-label" htmlFor="enhanced-persona">Enhanced Persona</Label>
                   </div>
                   <Switch
+                    id="enhanced-persona"
                     checked={options.usePersona}
                     onCheckedChange={(checked) => updateOption('usePersona', checked)}
+                    aria-labelledby="enhanced-persona-label"
                   />
                 </div>
                 <p className="text-xs text-gray-500 ml-6">
@@ -204,11 +263,13 @@ export const AdvancedOptimizer = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Users className="w-4 h-4" />
-                    <Label>Role Playing</Label>
+                    <Label id="role-playing-label" htmlFor="role-playing">Role Playing</Label>
                   </div>
                   <Switch
+                    id="role-playing"
                     checked={options.useRolePlay}
                     onCheckedChange={(checked) => updateOption('useRolePlay', checked)}
+                    aria-labelledby="role-playing-label"
                   />
                 </div>
                 <p className="text-xs text-gray-500 ml-6">
@@ -218,11 +279,13 @@ export const AdvancedOptimizer = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Target className="w-4 h-4" />
-                    <Label>Few-Shot Learning</Label>
+                    <Label id="few-shot-label" htmlFor="few-shot">Few-Shot Learning</Label>
                   </div>
                   <Switch
+                    id="few-shot"
                     checked={options.useFewShot}
                     onCheckedChange={(checked) => updateOption('useFewShot', checked)}
+                    aria-labelledby="few-shot-label"
                   />
                 </div>
                 <p className="text-xs text-gray-500 ml-6">
@@ -232,11 +295,13 @@ export const AdvancedOptimizer = ({
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <Settings className="w-4 h-4" />
-                    <Label>Advanced Constraints</Label>
+                    <Label id="advanced-constraints-label" htmlFor="advanced-constraints">Advanced Constraints</Label>
                   </div>
                   <Switch
+                    id="advanced-constraints"
                     checked={options.useConstraints}
                     onCheckedChange={(checked) => updateOption('useConstraints', checked)}
+                    aria-labelledby="advanced-constraints-label"
                   />
                 </div>
                 <p className="text-xs text-gray-500 ml-6">
@@ -246,16 +311,25 @@ export const AdvancedOptimizer = ({
             </div>
           </TabsContent>
 
-          <TabsContent value="settings" className="space-y-4">
+          <TabsContent 
+            value="settings" 
+            id="settings-content"
+            role="tabpanel"
+            aria-labelledby="settings-tab"
+            className="space-y-4"
+            tabIndex={0}
+          >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <TrendingUp className="w-4 h-4" />
-                  <Label>Token Optimization</Label>
+                  <Label id="token-optimization-label" htmlFor="token-optimization">Token Optimization</Label>
                 </div>
                 <Switch
+                  id="token-optimization"
                   checked={options.optimizeForTokens}
                   onCheckedChange={(checked) => updateOption('optimizeForTokens', checked)}
+                  aria-labelledby="token-optimization-label"
                 />
               </div>
               <p className="text-xs text-gray-500">
@@ -269,8 +343,17 @@ export const AdvancedOptimizer = ({
           onClick={onOptimize}
           disabled={isOptimizing}
           className="w-full mt-6"
+          aria-busy={isOptimizing}
+          aria-live={isOptimizing ? "polite" : undefined}
         >
-          {isOptimizing ? "Optimizing..." : "Apply Advanced Optimization"}
+          {isOptimizing ? (
+            <>
+              <span className="sr-only">Optimization in progress, please wait</span>
+              <span aria-hidden="true">Optimizing...</span>
+            </>
+          ) : (
+            <span>Apply Advanced Optimization</span>
+          )}
         </Button>
       </CardContent>
     </Card>
