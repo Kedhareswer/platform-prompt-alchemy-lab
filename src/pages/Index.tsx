@@ -9,6 +9,7 @@ import { ApiKeyManager } from "@/components/ApiKeyManager";
 import { AdvancedOptimizer } from "@/components/AdvancedOptimizer";
 import { OptimizationResults } from "@/components/OptimizationResults";
 import { PromptQualityIndicator } from "@/components/PromptQualityIndicator";
+import { ModeSelector } from "@/components/ModeSelector";
 import { useToast } from "@/hooks/use-toast";
 import { OptimizationOptions } from "@/utils/promptEngineering";
 import { PromptOptimizer, OptimizationResult } from "@/utils/promptOptimizer";

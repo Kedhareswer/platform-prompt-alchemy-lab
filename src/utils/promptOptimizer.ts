@@ -1,5 +1,6 @@
 import { SystemPrompt, getSystemPromptByPlatform } from './systemPrompts';
 import { PromptEngineer, PromptAnalysis, OptimizationOptions } from './promptEngineering';
+import { ModeOptimizer } from './modeOptimization';
 
 export interface OptimizationResult {
   originalPrompt: string;
@@ -20,7 +21,8 @@ export class PromptOptimizer {
     userPrompt: string,
     platform: string,
     domain: string,
-    options: OptimizationOptions
+    options: OptimizationOptions,
+    mode: "system" | "normal" = "normal"
   ): Promise<OptimizationResult> {
     // Get system prompt for platform
     const systemPrompt = getSystemPromptByPlatform(platform);
@@ -28,37 +30,40 @@ export class PromptOptimizer {
     // Analyze the original prompt
     const analysis = PromptEngineer.analyzePrompt(userPrompt);
     
-    let optimizedPrompt = userPrompt;
+    let optimizedPrompt = "";
     const appliedTechniques: string[] = [];
     
-    // Apply optimization techniques based on options and analysis
-    if (options.useTreeOfThoughts && analysis.complexity === 'expert') {
-      optimizedPrompt = PromptEngineer.applyTreeOfThoughts(optimizedPrompt);
-      appliedTechniques.push('Tree of Thoughts');
-    } else if (options.useChainOfThought && analysis.complexity !== 'simple') {
-      optimizedPrompt = PromptEngineer.applyChainOfThought(optimizedPrompt);
-      appliedTechniques.push('Chain of Thought');
+    // Apply mode-specific optimization
+    if (mode === "system") {
+      optimizedPrompt = ModeOptimizer.optimizeForSystemPrompt(userPrompt, domain, analysis, options);
+      appliedTechniques.push("System Prompt Optimization");
+    } else {
+      optimizedPrompt = ModeOptimizer.optimizeForNormalPrompt(userPrompt, domain, analysis, options);
+      appliedTechniques.push("Normal Prompt Optimization");
     }
     
-    if (options.useSelfConsistency && analysis.intent === 'problem_solving') {
-      optimizedPrompt = PromptEngineer.applySelfConsistency(optimizedPrompt);
-      appliedTechniques.push('Self Consistency');
+    // Apply additional optimization techniques based on options and analysis
+    if (mode === "normal") {
+      if (options.useTreeOfThoughts && analysis.complexity === 'expert') {
+        optimizedPrompt = PromptEngineer.applyTreeOfThoughts(optimizedPrompt);
+        appliedTechniques.push('Tree of Thoughts');
+      } else if (options.useChainOfThought && analysis.complexity !== 'simple') {
+        optimizedPrompt = PromptEngineer.applyChainOfThought(optimizedPrompt);
+        appliedTechniques.push('Chain of Thought');
+      }
+      
+      if (options.useSelfConsistency && analysis.intent === 'problem_solving') {
+        optimizedPrompt = PromptEngineer.applySelfConsistency(optimizedPrompt);
+        appliedTechniques.push('Self Consistency');
+      }
+      
+      if (options.useReAct && analysis.intent === 'problem_solving') {
+        optimizedPrompt = PromptEngineer.applyReActPattern(optimizedPrompt);
+        appliedTechniques.push('ReAct Pattern');
+      }
     }
     
-    if (options.useReAct && analysis.intent === 'problem_solving') {
-      optimizedPrompt = PromptEngineer.applyReActPattern(optimizedPrompt);
-      appliedTechniques.push('ReAct Pattern');
-    }
-    
-    if (options.useRolePlay && domain !== 'general') {
-      optimizedPrompt = PromptEngineer.applyRolePlay(optimizedPrompt, domain);
-      appliedTechniques.push('Role Playing');
-    } else if (options.usePersona) {
-      optimizedPrompt = PromptEngineer.applyEnhancedPersonaInjection(optimizedPrompt, domain);
-      appliedTechniques.push('Enhanced Persona Injection');
-    }
-    
-    if (options.useFewShot && analysis.complexity === 'complex') {
+    if (options.useFewShot && analysis.complexity === 'complex' && mode === "normal") {
       // Add few-shot examples based on domain
       const examples = this.getExamplesForDomain(domain);
       if (examples.length > 0) {
@@ -67,20 +72,9 @@ export class PromptOptimizer {
       }
     }
     
-    if (options.useConstraints) {
-      optimizedPrompt = this.addAdvancedConstraints(optimizedPrompt, analysis, domain);
-      appliedTechniques.push('Advanced Constraint Integration');
-    }
-    
-    if (options.optimizeForTokens) {
+    if (options.optimizeForTokens && mode === "normal") {
       optimizedPrompt = PromptEngineer.optimizeForTokens(optimizedPrompt);
       appliedTechniques.push('Token Optimization');
-    }
-    
-    // Integrate with system prompt if available
-    if (systemPrompt) {
-      optimizedPrompt = this.integrateSystemPrompt(optimizedPrompt, systemPrompt);
-      appliedTechniques.push('System Prompt Integration');
     }
     
     // Calculate token counts
