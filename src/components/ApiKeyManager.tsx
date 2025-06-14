@@ -44,13 +44,69 @@ export const ApiKeyManager = ({ provider, apiKey, onChange }: ApiKeyManagerProps
       url: "https://makersuite.google.com/app/apikey",
       placeholder: "AI...",
     },
+    together: {
+      name: "Together AI",
+      url: "https://api.together.xyz/settings/api-keys",
+      placeholder: "tok_...",
+    },
+    fireworks: {
+      name: "Fireworks AI",
+      url: "https://fireworks.ai/api-keys",
+      placeholder: "fw_...",
+    },
+    replicate: {
+      name: "Replicate",
+      url: "https://replicate.com/account/api-tokens",
+      placeholder: "r8_...",
+    },
+    huggingface: {
+      name: "Hugging Face",
+      url: "https://huggingface.co/settings/tokens",
+      placeholder: "hf_...",
+    },
+    perplexity: {
+      name: "Perplexity",
+      url: "https://www.perplexity.ai/settings/api",
+      placeholder: "pplx-...",
+    },
+    mistral: {
+      name: "Mistral AI",
+      url: "https://console.mistral.ai/api-keys/",
+      placeholder: "msk_...",
+    },
+    deepseek: {
+      name: "DeepSeek",
+      url: "https://platform.deepseek.com/api_keys",
+      placeholder: "sk-...",
+    },
+    "01ai": {
+      name: "01.AI",
+      url: "https://platform.01.ai/",
+      placeholder: "sk-...",
+    },
+    alibaba: {
+      name: "Alibaba Cloud",
+      url: "https://dashscope.aliyun.com/",
+      placeholder: "sk-...",
+    },
+  } as const;
+
+  // Safely get provider info with proper fallback
+  const getProviderInfo = () => {
+    const providerKey = provider as keyof typeof providerInfo;
+    if (providerInfo[providerKey]) {
+      return providerInfo[providerKey];
+    }
+    
+    // Safe fallback with all required properties
+    return {
+      name: provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : "Unknown Provider",
+      url: "#",
+      placeholder: "Enter API key...",
+    };
   };
 
-  const info = providerInfo[provider as keyof typeof providerInfo] || {
-    name: provider.charAt(0).toUpperCase() + provider.slice(1),
-    url: "#",
-    placeholder: "Enter API key...",
-  };
+  const info = getProviderInfo();
 
   return (
     <div className="space-y-2">

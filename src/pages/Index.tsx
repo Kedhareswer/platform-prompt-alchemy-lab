@@ -28,7 +28,7 @@ interface EnhancedOptimizationResult extends Omit<OptimizationResult, 'analysis'
 
 const Index = () => {
   const [userPrompt, setUserPrompt] = useState("");
-  const [selectedPlatform, setSelectedPlatform] = useState("gpt-4o");
+  const [selectedPlatform, setSelectedPlatform] = useState("gpt-4.1-2025-04-14");
   const [selectedDomain, setSelectedDomain] = useState("general");
   const [selectedProvider, setSelectedProvider] = useState("openai");
   const [apiKey, setApiKey] = useState("");
@@ -108,16 +108,16 @@ const Index = () => {
         optimizationOptions
       );
       
-      // Transform the result to match the expected type
+      // Transform the result to match the expected type with proper fallbacks
       const enhancedResult: EnhancedOptimizationResult = {
         ...result,
         analysis: {
-          complexity: result.analysis?.complexity || "simple",
+          complexity: result.analysis?.complexity || "moderate",
           intent: result.analysis?.intent || "informational",
           domain: result.analysis?.domain || selectedDomain,
-          estimatedResponseTime: 5,
-          strengths: [],
-          weaknesses: [],
+          estimatedResponseTime: result.analysis?.estimatedResponseTime || 5,
+          strengths: result.analysis?.strengths || [],
+          weaknesses: result.analysis?.weaknesses || [],
         }
       };
       
