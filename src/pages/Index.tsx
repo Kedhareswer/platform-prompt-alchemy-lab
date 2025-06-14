@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { SimplifiedHeader } from "@/components/SimplifiedHeader";
 import { PromptInput } from "@/components/PromptInput";
@@ -27,7 +26,6 @@ interface EnhancedOptimizationResult extends Omit<OptimizationResult, 'analysis'
     weaknesses?: string[];
   };
 }
-
 const Index = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("gpt-4.1-2025-04-14");
@@ -40,7 +38,6 @@ const Index = () => {
   const [qualityScore, setQualityScore] = useState<PromptQualityScore | null>(null);
   const [optimizationResult, setOptimizationResult] = useState<EnhancedOptimizationResult | null>(null);
   const [lastAnalyzedPrompt, setLastAnalyzedPrompt] = useState("");
-
   const [optimizationOptions, setOptimizationOptions] = useState<OptimizationOptions>({
     useChainOfThought: true,
     useFewShot: false,
@@ -50,20 +47,19 @@ const Index = () => {
     optimizeForTokens: false,
     useTreeOfThoughts: false,
     useSelfConsistency: false,
-    useRolePlay: false,
+    useRolePlay: false
   });
-
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
 
   // Debounce the quality analysis
   const analyzePromptQuality = useCallback(async (prompt: string) => {
     if (!prompt.trim() || prompt === lastAnalyzedPrompt) {
       return;
     }
-
     setIsAnalyzing(true);
     setLastAnalyzedPrompt(prompt);
-
     try {
       const qualityAnalysis = await SemanticAnalyzer.analyzePromptQuality(prompt);
       setQualityScore(qualityAnalysis);
@@ -73,45 +69,33 @@ const Index = () => {
       setIsAnalyzing(false);
     }
   }, [lastAnalyzedPrompt]);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       analyzePromptQuality(userPrompt);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [userPrompt, analyzePromptQuality]);
-
   const handleOptimize = async () => {
     if (!userPrompt.trim()) {
       toast({
         title: "Empty Prompt",
         description: "Please enter a prompt to optimize",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     if (!apiKey.trim()) {
       toast({
-        title: "API Key Required", 
+        title: "API Key Required",
         description: "Please enter your API key",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setIsOptimizing(true);
-    
     try {
-      const result = await PromptOptimizer.optimizePrompt(
-        userPrompt,
-        selectedPlatform,
-        selectedDomain,
-        optimizationOptions,
-        selectedMode
-      );
-      
+      const result = await PromptOptimizer.optimizePrompt(userPrompt, selectedPlatform, selectedDomain, optimizationOptions, selectedMode);
+
       // Transform the result to match the expected type with proper fallbacks
       const enhancedResult: EnhancedOptimizationResult = {
         ...result,
@@ -121,30 +105,26 @@ const Index = () => {
           domain: result.analysis?.domain || selectedDomain,
           estimatedResponseTime: result.analysis?.estimatedResponseTime || 5,
           strengths: result.analysis?.strengths || [],
-          weaknesses: result.analysis?.weaknesses || [],
+          weaknesses: result.analysis?.weaknesses || []
         }
       };
-      
       setOptimizationResult(enhancedResult);
-      
       toast({
         title: "Prompt Optimized Successfully",
-        description: `Applied ${result.appliedTechniques.length} optimization techniques in ${selectedMode} mode`,
+        description: `Applied ${result.appliedTechniques.length} optimization techniques in ${selectedMode} mode`
       });
     } catch (error) {
       console.error('Optimization error:', error);
       toast({
         title: "Optimization Failed",
         description: "Please check your API key and try again",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsOptimizing(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+  return <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute top-10 left-10 w-32 h-32 border-2 border-blue-200 rounded-full transform rotate-12 opacity-30"></div>
         <div className="absolute bottom-20 right-20 w-40 h-40 border-2 border-purple-200 transform -rotate-6 opacity-30"></div>
@@ -183,74 +163,32 @@ const Index = () => {
               </h2>
               
               <div className="space-y-4">
-                <PromptInput 
-                  value={userPrompt}
-                  onChange={setUserPrompt}
-                  placeholder="Enter your question or request (e.g., 'Best ML algorithm for image recognition')"
-                />
+                <PromptInput value={userPrompt} onChange={setUserPrompt} placeholder="Enter your question or request (e.g., 'Best ML algorithm for image recognition')" />
 
-                <ModeSelector 
-                  value={selectedMode}
-                  onChange={setSelectedMode}
-                />
+                <ModeSelector value={selectedMode} onChange={setSelectedMode} />
                 
-                <PlatformSelector 
-                  value={selectedPlatform}
-                  onChange={setSelectedPlatform}
-                />
+                <PlatformSelector value={selectedPlatform} onChange={setSelectedPlatform} />
                 
-                <DomainSelector 
-                  value={selectedDomain}
-                  onChange={setSelectedDomain}
-                />
+                <DomainSelector value={selectedDomain} onChange={setSelectedDomain} />
                 
-                <ProviderSelector 
-                  value={selectedProvider}
-                  onChange={setSelectedProvider}
-                />
+                <ProviderSelector value={selectedProvider} onChange={setSelectedProvider} />
                 
-                <ApiKeyManager 
-                  provider={selectedProvider}
-                  apiKey={apiKey}
-                  onChange={setApiKey}
-                />
+                <ApiKeyManager provider={selectedProvider} apiKey={apiKey} onChange={setApiKey} />
               </div>
             </div>
 
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20">
-              <PromptQualityIndicator 
-                qualityScore={qualityScore} 
-                isAnalyzing={isAnalyzing}
-              />
-            </div>
+            
           </div>
           
           <div className="lg:col-span-7 space-y-6">
-            <AdvancedOptimizer
-              options={optimizationOptions}
-              onOptionsChange={setOptimizationOptions}
-              onOptimize={handleOptimize}
-              isOptimizing={isOptimizing}
-            />
+            <AdvancedOptimizer options={optimizationOptions} onOptionsChange={setOptimizationOptions} onOptimize={handleOptimize} isOptimizing={isOptimizing} />
             
-            <OptimizationResults 
-              result={optimizationResult} 
-              isOptimizing={isOptimizing}
-            />
+            <OptimizationResults result={optimizationResult} isOptimizing={isOptimizing} />
 
-            {optimizationResult && (
-              <ExportPrompt
-                optimizedPrompt={optimizationResult.optimizedPrompt}
-                platform={selectedPlatform}
-                mode={selectedMode}
-                domain={selectedDomain}
-              />
-            )}
+            {optimizationResult && <ExportPrompt optimizedPrompt={optimizationResult.optimizedPrompt} platform={selectedPlatform} mode={selectedMode} domain={selectedDomain} />}
           </div>
         </div>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
