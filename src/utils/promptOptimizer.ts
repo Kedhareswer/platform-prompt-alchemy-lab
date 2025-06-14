@@ -1,3 +1,4 @@
+
 import { SystemPrompt, getSystemPromptByPlatform } from './systemPrompts';
 import { PromptEngineer, PromptAnalysis, OptimizationOptions } from './promptEngineering';
 import { ModeOptimizer } from './modeOptimization';
@@ -14,6 +15,7 @@ export interface OptimizationResult {
     optimized: number;
   };
   domain: string;
+  mode: "system" | "normal";
 }
 
 export class PromptOptimizer {
@@ -35,15 +37,18 @@ export class PromptOptimizer {
     
     // Apply mode-specific optimization
     if (mode === "system") {
-      optimizedPrompt = ModeOptimizer.optimizeForSystemPrompt(userPrompt, domain, analysis, options);
-      appliedTechniques.push("System Prompt Optimization");
+      optimizedPrompt = ModeOptimizer.optimizeForSystemPrompt(userPrompt, domain, analysis, options, platform);
+      appliedTechniques.push("System Prompt Optimization", "Platform-Specific Formatting");
+      
+      if (options.usePersona) appliedTechniques.push("Role Definition");
+      if (options.useConstraints) appliedTechniques.push("Structured Guidelines");
     } else {
-      optimizedPrompt = ModeOptimizer.optimizeForNormalPrompt(userPrompt, domain, analysis, options);
-      appliedTechniques.push("Normal Prompt Optimization");
-    }
-    
-    // Apply additional optimization techniques based on options and analysis
-    if (mode === "normal") {
+      optimizedPrompt = ModeOptimizer.optimizeForNormalPrompt(userPrompt, domain, analysis, options, platform);
+      appliedTechniques.push("Normal Prompt Optimization", "Conversational Enhancement");
+      
+      if (options.usePersona || options.useRolePlay) appliedTechniques.push("Persona Integration");
+      
+      // Apply additional optimization techniques for normal mode
       if (options.useTreeOfThoughts && analysis.complexity === 'expert') {
         optimizedPrompt = PromptEngineer.applyTreeOfThoughts(optimizedPrompt);
         appliedTechniques.push('Tree of Thoughts');
@@ -61,20 +66,19 @@ export class PromptOptimizer {
         optimizedPrompt = PromptEngineer.applyReActPattern(optimizedPrompt);
         appliedTechniques.push('ReAct Pattern');
       }
-    }
-    
-    if (options.useFewShot && analysis.complexity === 'complex' && mode === "normal") {
-      // Add few-shot examples based on domain
-      const examples = this.getExamplesForDomain(domain);
-      if (examples.length > 0) {
-        optimizedPrompt = PromptEngineer.applyFewShotLearning(optimizedPrompt, examples);
-        appliedTechniques.push('Few-Shot Learning');
+
+      if (options.useFewShot && analysis.complexity === 'complex') {
+        const examples = this.getExamplesForDomain(domain);
+        if (examples.length > 0) {
+          optimizedPrompt = PromptEngineer.applyFewShotLearning(optimizedPrompt, examples);
+          appliedTechniques.push('Few-Shot Learning');
+        }
       }
-    }
-    
-    if (options.optimizeForTokens && mode === "normal") {
-      optimizedPrompt = PromptEngineer.optimizeForTokens(optimizedPrompt);
-      appliedTechniques.push('Token Optimization');
+      
+      if (options.optimizeForTokens) {
+        optimizedPrompt = PromptEngineer.optimizeForTokens(optimizedPrompt);
+        appliedTechniques.push('Token Optimization');
+      }
     }
     
     // Calculate token counts
@@ -86,7 +90,8 @@ export class PromptOptimizer {
       analysis,
       appliedTechniques.length,
       options,
-      domain
+      domain,
+      mode
     );
     
     return {
@@ -100,7 +105,8 @@ export class PromptOptimizer {
         original: originalTokens,
         optimized: optimizedTokens
       },
-      domain
+      domain,
+      mode
     };
   }
   
@@ -195,9 +201,15 @@ ${constraints.map(c => `• ${c}`).join('\n')}`;
     analysis: PromptAnalysis,
     techniquesApplied: number,
     options: OptimizationOptions,
-    domain: string
+    domain: string,
+    mode: "system" | "normal"
   ): number {
     let baseScore = 60;
+    
+    // Add points for mode-specific optimization
+    if (mode === 'system') {
+      baseScore += 10; // System prompts get higher base improvement
+    }
     
     // Add points for complexity handling
     if (analysis.complexity === 'complex' || analysis.complexity === 'expert') {

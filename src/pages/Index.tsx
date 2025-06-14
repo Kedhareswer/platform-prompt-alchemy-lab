@@ -9,7 +9,8 @@ import { ApiKeyManager } from "@/components/ApiKeyManager";
 import { AdvancedOptimizer } from "@/components/AdvancedOptimizer";
 import { OptimizationResults } from "@/components/OptimizationResults";
 import { PromptQualityIndicator } from "@/components/PromptQualityIndicator";
-import { ModeSelector } from "@/components/ModeSelector";
+import { ModeSelector, PromptMode } from "@/components/ModeSelector";
+import { ExportPrompt } from "@/components/ExportPrompt";
 import { useToast } from "@/hooks/use-toast";
 import { OptimizationOptions } from "@/utils/promptEngineering";
 import { PromptOptimizer, OptimizationResult } from "@/utils/promptOptimizer";
@@ -32,6 +33,7 @@ const Index = () => {
   const [selectedPlatform, setSelectedPlatform] = useState("gpt-4.1-2025-04-14");
   const [selectedDomain, setSelectedDomain] = useState("general");
   const [selectedProvider, setSelectedProvider] = useState("openai");
+  const [selectedMode, setSelectedMode] = useState<PromptMode>("normal");
   const [apiKey, setApiKey] = useState("");
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -106,7 +108,8 @@ const Index = () => {
         userPrompt,
         selectedPlatform,
         selectedDomain,
-        optimizationOptions
+        optimizationOptions,
+        selectedMode
       );
       
       // Transform the result to match the expected type with proper fallbacks
@@ -116,9 +119,9 @@ const Index = () => {
           complexity: result.analysis?.complexity || "moderate",
           intent: result.analysis?.intent || "informational",
           domain: result.analysis?.domain || selectedDomain,
-          estimatedResponseTime: 5,
-          strengths: [],
-          weaknesses: [],
+          estimatedResponseTime: result.analysis?.estimatedResponseTime || 5,
+          strengths: result.analysis?.strengths || [],
+          weaknesses: result.analysis?.weaknesses || [],
         }
       };
       
@@ -126,7 +129,7 @@ const Index = () => {
       
       toast({
         title: "Prompt Optimized Successfully",
-        description: `Applied ${result.appliedTechniques.length} optimization techniques`,
+        description: `Applied ${result.appliedTechniques.length} optimization techniques in ${selectedMode} mode`,
       });
     } catch (error) {
       console.error('Optimization error:', error);
@@ -156,14 +159,16 @@ const Index = () => {
             Super-Charge Your AI Prompts
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Transform your basic questions into professional, detailed prompts that get exceptional AI responses. 
-            Perfect for any AI assistant - just select your target platform and expertise domain.
+            Transform your basic questions into professional prompts. Choose between System Prompts for AI platforms or Normal Prompts for direct chat.
           </p>
           <div className="mt-6 flex justify-center">
             <div className="bg-white/80 backdrop-blur-sm rounded-full px-6 py-2 border border-blue-200">
               <p className="text-sm text-gray-700">
-                <span className="font-medium text-blue-600">Example:</span> 
-                "Best ML algo for my project" → "As a senior machine learning engineer with expertise in neural networks, please provide a comprehensive analysis of the most suitable algorithm for my CNN-based computer vision project, including implementation considerations, performance trade-offs, and deployment strategies..."
+                <span className="font-medium text-blue-600">System Mode:</span> 
+                Perfect for ChatGPT Custom Instructions, Claude Projects, API setup
+                <span className="mx-2">|</span>
+                <span className="font-medium text-green-600">Normal Mode:</span> 
+                Ready-to-paste optimized prompts for any AI chat
               </p>
             </div>
           </div>
@@ -182,6 +187,11 @@ const Index = () => {
                   value={userPrompt}
                   onChange={setUserPrompt}
                   placeholder="Enter your question or request (e.g., 'Best ML algorithm for image recognition')"
+                />
+
+                <ModeSelector 
+                  value={selectedMode}
+                  onChange={setSelectedMode}
                 />
                 
                 <PlatformSelector 
@@ -227,6 +237,15 @@ const Index = () => {
               result={optimizationResult} 
               isOptimizing={isOptimizing}
             />
+
+            {optimizationResult && (
+              <ExportPrompt
+                optimizedPrompt={optimizationResult.optimizedPrompt}
+                platform={selectedPlatform}
+                mode={selectedMode}
+                domain={selectedDomain}
+              />
+            )}
           </div>
         </div>
       </main>
