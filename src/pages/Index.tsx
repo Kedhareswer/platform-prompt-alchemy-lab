@@ -115,9 +115,9 @@ const Index = () => {
           complexity: result.analysis?.complexity || "moderate",
           intent: result.analysis?.intent || "informational",
           domain: result.analysis?.domain || selectedDomain,
-          estimatedResponseTime: result.analysis?.estimatedResponseTime || 5,
-          strengths: result.analysis?.strengths || [],
-          weaknesses: result.analysis?.weaknesses || [],
+          estimatedResponseTime: 5,
+          strengths: [],
+          weaknesses: [],
         }
       };
       

@@ -12,6 +12,9 @@ export const PromptAnalysisSchema = z.object({
   confidence: z.number().min(0).max(100),
   estimatedTokens: z.number().min(0),
   suggestedTechniques: z.array(z.string()),
+  estimatedResponseTime: z.number().min(0).optional(),
+  strengths: z.array(z.string()).optional(),
+  weaknesses: z.array(z.string()).optional(),
 });
 
 // Define TypeScript type from Zod schema
