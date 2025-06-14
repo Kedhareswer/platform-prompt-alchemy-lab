@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { SimplifiedHeader } from "@/components/SimplifiedHeader";
 import { PromptInput } from "@/components/PromptInput";
@@ -14,6 +15,10 @@ import { useToast } from "@/hooks/use-toast";
 import { OptimizationOptions } from "@/utils/promptEngineering";
 import { PromptOptimizer, OptimizationResult } from "@/utils/promptOptimizer";
 import { SemanticAnalyzer, PromptQualityScore } from "@/utils/semanticAnalysis";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Settings, Zap, Target, Sparkles } from "lucide-react";
 
 // Enhanced type to match OptimizationResults component expectations
 interface EnhancedOptimizationResult extends Omit<OptimizationResult, 'analysis'> {
@@ -68,12 +73,14 @@ const Index = () => {
       setIsAnalyzing(false);
     }
   }, [lastAnalyzedPrompt]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       analyzePromptQuality(userPrompt);
     }, 500);
     return () => clearTimeout(timer);
   }, [userPrompt, analyzePromptQuality]);
+
   const handleOptimize = async () => {
     if (!userPrompt.trim()) {
       toast({
@@ -95,7 +102,6 @@ const Index = () => {
     try {
       const result = await PromptOptimizer.optimizePrompt(userPrompt, selectedPlatform, selectedDomain, optimizationOptions, selectedMode);
 
-      // Transform the result to match the expected type with proper fallbacks
       const enhancedResult: EnhancedOptimizationResult = {
         ...result,
         analysis: {
@@ -123,100 +129,107 @@ const Index = () => {
       setIsOptimizing(false);
     }
   };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
       <SimplifiedHeader />
       
-      <main className="container mx-auto px-6 py-12 max-w-7xl">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-slate-900 mb-6 tracking-tight">
-            AI Prompt Engineering
-            <span className="block text-blue-600 text-4xl mt-2">Made Simple</span>
-          </h1>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Transform your prompts with advanced optimization techniques. Get better responses from any AI model.
-          </p>
-          
-          <div className="inline-flex items-center px-6 py-3 bg-white/70 backdrop-blur-sm rounded-full border border-slate-200 shadow-sm">
-            <div className="flex items-center space-x-8 text-sm text-slate-700">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span className="font-medium">System Mode:</span>
-                <span>Perfect for AI platform setup</span>
-              </div>
-              <div className="w-px h-4 bg-slate-300"></div>
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="font-medium">Normal Mode:</span>
-                <span>Ready-to-use prompts</span>
-              </div>
-            </div>
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Hero Section - More Compact */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full mb-6">
+            <Sparkles className="w-4 h-4 text-blue-600 mr-2" />
+            <span className="text-sm font-medium text-blue-700">AI Prompt Engineering Platform</span>
           </div>
+          
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+            Optimize Your AI Prompts
+          </h1>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            Transform your prompts with advanced optimization techniques for better AI responses across any platform.
+          </p>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-5 gap-8">
-          {/* Configuration Panel */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200/60">
-              <div className="flex items-center space-x-3 mb-8">
-                <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
-                  <div className="w-5 h-5 bg-white rounded-sm"></div>
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-900">Configuration</h2>
-                  <p className="text-sm text-slate-500">Set up your prompt parameters</p>
-                </div>
-              </div>
-              
-              <div className="space-y-6">
+        {/* Main Content - Horizontal Layout */}
+        <div className="grid lg:grid-cols-12 gap-8">
+          {/* Left Sidebar - Configuration */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Input Section */}
+            <Card className="border-0 shadow-sm bg-white/80 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Target className="w-5 h-5 text-blue-600" />
+                  Input & Setup
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
                 <PromptInput 
                   value={userPrompt} 
                   onChange={setUserPrompt} 
-                  placeholder="Enter your question or request (e.g., 'Best ML algorithm for image recognition')" 
+                  placeholder="Enter your prompt here..."
                 />
-
+                
                 <ModeSelector value={selectedMode} onChange={setSelectedMode} />
                 
-                <div className="grid grid-cols-1 gap-4">
-                  <PlatformSelector value={selectedPlatform} onChange={setSelectedPlatform} />
-                  <DomainSelector value={selectedDomain} onChange={setSelectedDomain} />
-                  <ProviderSelector value={selectedProvider} onChange={setSelectedProvider} />
-                </div>
-                
+                {userPrompt && (
+                  <div className="pt-4 border-t border-slate-100">
+                    <PromptQualityIndicator 
+                      qualityScore={qualityScore} 
+                      isAnalyzing={isAnalyzing} 
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Settings Section */}
+            <Card className="border-0 shadow-sm bg-white/80 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Settings className="w-5 h-5 text-slate-600" />
+                  Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <PlatformSelector value={selectedPlatform} onChange={setSelectedPlatform} />
+                <DomainSelector value={selectedDomain} onChange={setSelectedDomain} />
+                <ProviderSelector value={selectedProvider} onChange={setSelectedProvider} />
                 <ApiKeyManager 
                   provider={selectedProvider} 
                   apiKey={apiKey} 
                   onChange={setApiKey} 
                 />
-
-                {userPrompt && (
-                  <div className="pt-4 border-t border-slate-100">
-                    <PromptQualityIndicator 
-                      score={qualityScore} 
-                      isAnalyzing={isAnalyzing} 
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
           
-          {/* Results Panel */}
-          <div className="lg:col-span-3 space-y-6">
-            <AdvancedOptimizer 
-              options={optimizationOptions} 
-              onOptionsChange={setOptimizationOptions} 
-              onOptimize={handleOptimize} 
-              isOptimizing={isOptimizing} 
-            />
+          {/* Center & Right - Optimization & Results */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Optimization Controls */}
+            <Card className="border-0 shadow-sm bg-white/80 backdrop-blur-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Zap className="w-5 h-5 text-orange-600" />
+                  Optimization Engine
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AdvancedOptimizer 
+                  options={optimizationOptions} 
+                  onOptionsChange={setOptimizationOptions} 
+                  onOptimize={handleOptimize} 
+                  isOptimizing={isOptimizing} 
+                />
+              </CardContent>
+            </Card>
             
+            {/* Results Section */}
             <OptimizationResults 
               result={optimizationResult} 
               isOptimizing={isOptimizing} 
             />
 
+            {/* Export Section */}
             {optimizationResult && (
               <ExportPrompt 
                 optimizedPrompt={optimizationResult.optimizedPrompt} 
@@ -228,10 +241,20 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="mt-20 pt-8 border-t border-slate-200/60">
-          <div className="text-center text-slate-500 text-sm">
-            <p>Powered by advanced AI optimization techniques</p>
+        {/* Status Bar */}
+        <div className="mt-12 pt-6 border-t border-slate-200">
+          <div className="flex items-center justify-between text-sm text-slate-500">
+            <div className="flex items-center gap-4">
+              <Badge variant="outline" className="text-xs">
+                {selectedMode === "system" ? "System Mode" : "Normal Mode"}
+              </Badge>
+              <span>Platform: {selectedPlatform}</span>
+              <span>Domain: {selectedDomain}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span>Ready</span>
+            </div>
           </div>
         </div>
       </main>
