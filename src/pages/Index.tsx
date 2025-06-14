@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from "react";
 import { SimplifiedHeader } from "@/components/SimplifiedHeader";
 import { PromptInput } from "@/components/PromptInput";
@@ -31,7 +30,6 @@ interface EnhancedOptimizationResult extends Omit<OptimizationResult, 'analysis'
     weaknesses?: string[];
   };
 }
-
 const Index = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("gpt-4.1-2025-04-14");
@@ -55,7 +53,9 @@ const Index = () => {
     useSelfConsistency: false,
     useRolePlay: false
   });
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
 
   // Debounce the quality analysis
   const analyzePromptQuality = useCallback(async (prompt: string) => {
@@ -73,14 +73,12 @@ const Index = () => {
       setIsAnalyzing(false);
     }
   }, [lastAnalyzedPrompt]);
-
   useEffect(() => {
     const timer = setTimeout(() => {
       analyzePromptQuality(userPrompt);
     }, 500);
     return () => clearTimeout(timer);
   }, [userPrompt, analyzePromptQuality]);
-
   const handleOptimize = async () => {
     if (!userPrompt.trim()) {
       toast({
@@ -101,7 +99,6 @@ const Index = () => {
     setIsOptimizing(true);
     try {
       const result = await PromptOptimizer.optimizePrompt(userPrompt, selectedPlatform, selectedDomain, optimizationOptions, selectedMode);
-
       const enhancedResult: EnhancedOptimizationResult = {
         ...result,
         analysis: {
@@ -129,9 +126,7 @@ const Index = () => {
       setIsOptimizing(false);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
+  return <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white">
       <SimplifiedHeader />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
@@ -163,22 +158,11 @@ const Index = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <PromptInput 
-                  value={userPrompt} 
-                  onChange={setUserPrompt} 
-                  placeholder="Enter your prompt here..."
-                />
+                <PromptInput value={userPrompt} onChange={setUserPrompt} placeholder="Enter your prompt here..." />
                 
                 <ModeSelector value={selectedMode} onChange={setSelectedMode} />
                 
-                {userPrompt && (
-                  <div className="pt-4 border-t border-slate-100">
-                    <PromptQualityIndicator 
-                      qualityScore={qualityScore} 
-                      isAnalyzing={isAnalyzing} 
-                    />
-                  </div>
-                )}
+                {userPrompt}
               </CardContent>
             </Card>
 
@@ -194,11 +178,7 @@ const Index = () => {
                 <PlatformSelector value={selectedPlatform} onChange={setSelectedPlatform} />
                 <DomainSelector value={selectedDomain} onChange={setSelectedDomain} />
                 <ProviderSelector value={selectedProvider} onChange={setSelectedProvider} />
-                <ApiKeyManager 
-                  provider={selectedProvider} 
-                  apiKey={apiKey} 
-                  onChange={setApiKey} 
-                />
+                <ApiKeyManager provider={selectedProvider} apiKey={apiKey} onChange={setApiKey} />
               </CardContent>
             </Card>
           </div>
@@ -214,30 +194,15 @@ const Index = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <AdvancedOptimizer 
-                  options={optimizationOptions} 
-                  onOptionsChange={setOptimizationOptions} 
-                  onOptimize={handleOptimize} 
-                  isOptimizing={isOptimizing} 
-                />
+                <AdvancedOptimizer options={optimizationOptions} onOptionsChange={setOptimizationOptions} onOptimize={handleOptimize} isOptimizing={isOptimizing} />
               </CardContent>
             </Card>
             
             {/* Results Section */}
-            <OptimizationResults 
-              result={optimizationResult} 
-              isOptimizing={isOptimizing} 
-            />
+            <OptimizationResults result={optimizationResult} isOptimizing={isOptimizing} />
 
             {/* Export Section */}
-            {optimizationResult && (
-              <ExportPrompt 
-                optimizedPrompt={optimizationResult.optimizedPrompt} 
-                platform={selectedPlatform} 
-                mode={selectedMode} 
-                domain={selectedDomain} 
-              />
-            )}
+            {optimizationResult && <ExportPrompt optimizedPrompt={optimizationResult.optimizedPrompt} platform={selectedPlatform} mode={selectedMode} domain={selectedDomain} />}
           </div>
         </div>
 
@@ -258,8 +223,6 @@ const Index = () => {
           </div>
         </div>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
