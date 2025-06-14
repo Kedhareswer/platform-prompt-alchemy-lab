@@ -138,9 +138,7 @@ const Index = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Super-Charge Your AI Prompts
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Transform your basic questions into professional prompts. Choose between System Prompts for AI platforms or Normal Prompts for direct chat.
-          </p>
+          
           <div className="mt-6 flex justify-center">
             <div className="bg-white/80 backdrop-blur-sm rounded-full px-6 py-2 border border-blue-200">
               <p className="text-sm text-gray-700">
