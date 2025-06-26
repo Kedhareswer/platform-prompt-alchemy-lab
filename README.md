@@ -293,7 +293,7 @@ Code style: Functional components, custom hooks where appropriate."
 
 <div align="center">
   <img src="public\dashboard1.png" alt="Dashboard" width="45%">
-  <img src="public\results1.png" alt="Results" width="45%">
+  <img src="public\Results.png" alt="Results" width="45%">
 </div>
 
 ---
