@@ -1,4 +1,3 @@
-
 <div align="center">
   <img src="public/PromptForge.png" alt="PromptForge Logo" width="120" height="120">
   
@@ -201,14 +200,14 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 | Technique | Description | Use Case | Effectiveness |
 |-----------|-------------|----------|---------------|
-| **🧠 Chain of Thought** | Step-by-step reasoning | Complex problem solving | ⭐⭐⭐⭐⭐ |
-| **📚 Few-Shot Learning** | Example-based training | Pattern recognition | ⭐⭐⭐⭐ |
-| **🔄 ReAct** | Reasoning + Acting | Multi-step tasks | ⭐⭐⭐⭐ |
-| **🎭 Persona Injection** | Role-based responses | Specialized outputs | ⭐⭐⭐⭐ |
-| **📏 Constraint Integration** | Boundary setting | Controlled responses | ⭐⭐⭐ |
-| **🌳 Tree of Thoughts** | Multiple reasoning paths | Complex decisions | ⭐⭐⭐⭐⭐ |
-| **🎯 Token Optimization** | Efficiency improvement | Cost reduction | ⭐⭐⭐ |
-| **🔍 Self-Consistency** | Multiple sampling | Reliability boost | ⭐⭐⭐⭐ |
+| **🧠 Chain of Thought** | Step-by-step reasoning | Complex problem solving | ⭐⭐⭐⭐ |
+| **📚 Few-Shot Learning** | Example-based training | Pattern recognition | ⭐⭐⭐ |
+| **🔄 ReAct** | Reasoning + Acting | Multi-step tasks | ⭐⭐⭐ |
+| **🎭 Persona Injection** | Role-based responses | Specialized outputs | ⭐⭐⭐ |
+| **📏 Constraint Integration** | Boundary setting | Controlled responses | ⭐⭐ |
+| **🌳 Tree of Thoughts** | Multiple reasoning paths | Complex decisions | ⭐⭐⭐⭐ |
+| **🎯 Token Optimization** | Efficiency improvement | Cost reduction | ⭐⭐ |
+| **🔍 Self-Consistency** | Multiple sampling | Reliability boost | ⭐⭐⭐ |
 
 </div>
 
@@ -341,10 +340,7 @@ git push origin feature/amazing-feature
 ## 🎉 Community & Support
 
 <div align="center">
-
-[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord)](https://discord.gg/promptforge)
 [![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github)](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/discussions)
-[![Twitter](https://img.shields.io/badge/Twitter-Follow%20Updates-1DA1F2?style=for-the-badge&logo=twitter)](https://twitter.com/promptforge)
 
 </div>
 
