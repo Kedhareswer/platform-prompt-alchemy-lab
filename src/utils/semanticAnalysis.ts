@@ -1,7 +1,7 @@
 import { CohereClient } from 'cohere-ai';
 
 // Initialize Cohere client
-// Note: API key will be provided by the user through the UI
+// Note: API key will be provided by the user through the UI or from environment variables
 let cohereClient: CohereClient | null = null;
 
 export interface PromptQualityScore {
@@ -18,16 +18,24 @@ export interface PromptQualityScore {
 
 export class SemanticAnalyzer {
   /**
-   * Initialize the Cohere client with the provided API key
+   * Initialize the Cohere client with the provided API key or environment variable
    */
   static initializeClient(apiKey: string): void {
-    cohereClient = new CohereClient({ 
-      token: apiKey 
-    });
+    // If apiKey is empty, try to use the environment variable
+    const key = apiKey || import.meta.env.VITE_COHERE_API_KEY;
+    
+    if (key) {
+      cohereClient = new CohereClient({ 
+        token: key 
+      });
+    } else {
+      console.warn("No Cohere API key provided. Using basic analysis.");
+      cohereClient = null;
+    }
   }
 
   /**
-   * Analyze prompt quality using Cohere's API
+   * Analyze prompt quality using Cohere's API or fallback to basic analysis
    */
   static async analyzePromptQuality(prompt: string): Promise<PromptQualityScore> {
     // If no API key has been provided yet, use a basic analysis

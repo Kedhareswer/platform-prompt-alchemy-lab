@@ -60,6 +60,15 @@ const Index = () => {
   
   const { toast } = useToast();
 
+  // Initialize the Cohere client when the component mounts
+  useEffect(() => {
+    // Initialize with environment variable if available
+    if (import.meta.env.VITE_COHERE_API_KEY) {
+      PromptOptimizer.initializeClient(import.meta.env.VITE_COHERE_API_KEY);
+      SemanticAnalyzer.initializeClient(import.meta.env.VITE_COHERE_API_KEY);
+    }
+  }, []);
+
   // Debounce the quality analysis
   const analyzePromptQuality = useCallback(async (prompt: string) => {
     if (!prompt.trim() || prompt === lastAnalyzedPrompt) {
@@ -94,10 +103,12 @@ const Index = () => {
       return;
     }
     
-    if (!apiKey && selectedProvider === "cohere") {
+    // Only check for API key if the selected provider is not Cohere
+    // For Cohere, we'll use the environment variable if available
+    if (selectedProvider !== "cohere" && !apiKey) {
       toast({
         title: "API Key Required",
-        description: "Please enter your Cohere API key to optimize prompts",
+        description: `Please enter your ${selectedProvider} API key to optimize prompts`,
         variant: "destructive"
       });
       return;
@@ -105,6 +116,17 @@ const Index = () => {
     
     setIsOptimizing(true);
     try {
+      // Initialize the client with the API key if provided, otherwise it will use the env variable
+      if (selectedProvider === "cohere") {
+        // For Cohere, use the environment variable if available
+        PromptOptimizer.initializeClient(apiKey || import.meta.env.VITE_COHERE_API_KEY || "");
+        SemanticAnalyzer.initializeClient(apiKey || import.meta.env.VITE_COHERE_API_KEY || "");
+      } else {
+        // For other providers, use the user-provided API key
+        PromptOptimizer.initializeClient(apiKey);
+        SemanticAnalyzer.initializeClient(apiKey);
+      }
+      
       const result = await PromptOptimizer.optimizePrompt(
         userPrompt, 
         selectedPlatform, 
@@ -232,7 +254,9 @@ const Index = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <ProviderSelector value={selectedProvider} onChange={setSelectedProvider} />
-                <ApiKeyManager provider={selectedProvider} apiKey={apiKey} onChange={setApiKey} />
+                {selectedProvider !== "cohere" && (
+                  <ApiKeyManager provider={selectedProvider} apiKey={apiKey} onChange={setApiKey} />
+                )}
                 <PlatformSelector value={selectedPlatform} onChange={setSelectedPlatform} />
                 <DomainSelector value={selectedDomain} onChange={setSelectedDomain} />
               </CardContent>
