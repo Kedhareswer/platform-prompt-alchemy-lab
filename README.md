@@ -1,7 +1,7 @@
 <div align="center">
   <img src="public\c680c22f-c0a5-4287-ace7-b4ae61820b72-removebg-preview.png" alt="PromptForge Logo" width="120" height="120">
   
-  # 🚀 PromptForge
+  # 🚀 PromptForger
   ### *AI Prompt Engineering Platform*
   
   [![MIT License](https://img.shields.io/badge/License-MIT-brightgreen.svg?style=for-the-badge)](LICENSE)
