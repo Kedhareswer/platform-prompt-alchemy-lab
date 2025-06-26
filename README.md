@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/PromptForge.png" alt="PromptForge Logo" width="120" height="120">
+  <img src="public\c680c22f-c0a5-4287-ace7-b4ae61820b72-removebg-preview.png" alt="PromptForge Logo" width="120" height="120">
   
   # 🚀 PromptForge
   ### *AI Prompt Engineering Platform*
@@ -15,7 +15,7 @@
 
   **Transform your AI prompts with advanced optimization techniques for better responses across any platform.**
   
-  [🎯 **Try Demo**](https://promptforge.lovable.app) • [📚 **Documentation**](#-documentation) • [🤝 **Contribute**](#-contributing) • [⭐ **Star this repo**](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/stargazers)
+  [🎯 **Try Demo**](https://prompt-enhancer-hazel.vercel.app/) • [📚 **Documentation**](#-documentation) • [🤝 **Contribute**](#-contributing) • [⭐ **Star this repo**](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/stargazers)
 </div>
 
 ---
@@ -292,8 +292,8 @@ Code style: Functional components, custom hooks where appropriate."
 ## 🎨 Screenshots
 
 <div align="center">
-  <img src="https://via.placeholder.com/800x400/0066CC/FFFFFF?text=PromptForge+Dashboard" alt="Dashboard" width="45%">
-  <img src="https://via.placeholder.com/800x400/00AA44/FFFFFF?text=Optimization+Results" alt="Results" width="45%">
+  <img src="public\dashboard1.png" alt="Dashboard" width="45%">
+  <img src="public\results1.png" alt="Results" width="45%">
 </div>
 
 ---
@@ -367,7 +367,4 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ---
 
 **⭐ If you find PromptForge useful, please consider [starring the repository](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/stargazers) to support development!**
-
-*Made with ❤️ by the PromptForge community*
-
 </div>
