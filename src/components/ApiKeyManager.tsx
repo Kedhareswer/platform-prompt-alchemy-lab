@@ -1,8 +1,9 @@
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { SemanticAnalyzer } from "@/utils/semanticAnalysis";
+import { PromptOptimizer } from "@/utils/promptOptimizer";
 
 interface ApiKeyManagerProps {
   provider: string;
@@ -13,7 +14,24 @@ interface ApiKeyManagerProps {
 export const ApiKeyManager = ({ provider, apiKey, onChange }: ApiKeyManagerProps) => {
   const [showKey, setShowKey] = useState(false);
 
+  // Initialize the appropriate client when the API key changes
+  const handleApiKeyChange = (value: string) => {
+    onChange(value);
+    
+    // Initialize the appropriate client based on the provider
+    if (provider === 'cohere') {
+      SemanticAnalyzer.initializeClient(value);
+      PromptOptimizer.initializeClient(value);
+    }
+    // Add other providers as needed
+  };
+
   const providerInfo = {
+    cohere: {
+      name: "Cohere",
+      url: "https://dashboard.cohere.com/api-keys",
+      placeholder: "co_...",
+    },
     groq: {
       name: "Groq",
       url: "https://console.groq.com/keys",
@@ -23,11 +41,6 @@ export const ApiKeyManager = ({ provider, apiKey, onChange }: ApiKeyManagerProps
       name: "AI/ML API",
       url: "https://aimlapi.com/app/keys",
       placeholder: "sk-...",
-    },
-    cohere: {
-      name: "Cohere",
-      url: "https://dashboard.cohere.ai/api-keys",
-      placeholder: "co_...",
     },
     openai: {
       name: "OpenAI",
@@ -130,7 +143,7 @@ export const ApiKeyManager = ({ provider, apiKey, onChange }: ApiKeyManagerProps
         <Input
           type={showKey ? "text" : "password"}
           value={apiKey}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => handleApiKeyChange(e.target.value)}
           placeholder={info.placeholder}
           className="pr-10 border-gray-300 focus:border-blue-500 focus:ring-blue-500"
         />

@@ -14,6 +14,8 @@ import { OptimizationResults } from "@/components/OptimizationResults";
 import { PromptQualityIndicator } from "@/components/PromptQualityIndicator";
 import { ModeSelector, PromptMode } from "@/components/ModeSelector";
 import { ExportPrompt } from "@/components/ExportPrompt";
+import { ProviderSelector } from "@/components/ProviderSelector";
+import { ApiKeyManager } from "@/components/ApiKeyManager";
 
 // Utils
 import { OptimizationOptions } from "@/utils/promptEngineering";
@@ -35,6 +37,8 @@ interface EnhancedOptimizationResult extends Omit<OptimizationResult, 'analysis'
 const Index = () => {
   const [userPrompt, setUserPrompt] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("gpt-4o");
+  const [selectedProvider, setSelectedProvider] = useState("cohere");
+  const [apiKey, setApiKey] = useState("");
   const [selectedDomain, setSelectedDomain] = useState("general");
   const [selectedMode, setSelectedMode] = useState<PromptMode>("normal");
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -85,6 +89,15 @@ const Index = () => {
       toast({
         title: "Empty Prompt",
         description: "Please enter a prompt to optimize",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!apiKey && selectedProvider === "cohere") {
+      toast({
+        title: "API Key Required",
+        description: "Please enter your Cohere API key to optimize prompts",
         variant: "destructive"
       });
       return;
@@ -218,6 +231,8 @@ const Index = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <ProviderSelector value={selectedProvider} onChange={setSelectedProvider} />
+                <ApiKeyManager provider={selectedProvider} apiKey={apiKey} onChange={setApiKey} />
                 <PlatformSelector value={selectedPlatform} onChange={setSelectedPlatform} />
                 <DomainSelector value={selectedDomain} onChange={setSelectedDomain} />
               </CardContent>

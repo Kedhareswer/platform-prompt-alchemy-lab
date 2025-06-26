@@ -1,13 +1,23 @@
+import { CohereClient } from 'cohere-ai';
+import { PromptMode } from "@/components/ModeSelector";
+import { OptimizationOptions } from "./promptEngineering";
 
-import { SystemPrompt, getSystemPromptByPlatform } from './systemPrompts';
-import { PromptEngineer, PromptAnalysis, OptimizationOptions } from './promptEngineering';
-import { ModeOptimizer } from './modeOptimization';
+// Initialize Cohere client
+// Note: API key will be provided by the user through the UI
+let cohereClient: CohereClient | null = null;
 
 export interface OptimizationResult {
   originalPrompt: string;
   optimizedPrompt: string;
-  systemPrompt: SystemPrompt | null;
-  analysis: PromptAnalysis;
+  systemPrompt: any | null;
+  analysis: {
+    complexity: string;
+    intent: string;
+    domain: string;
+    estimatedResponseTime?: number;
+    strengths?: string[];
+    weaknesses?: string[];
+  };
   appliedTechniques: string[];
   estimatedImprovement: number;
   tokenCount: {
@@ -19,6 +29,15 @@ export interface OptimizationResult {
 }
 
 export class PromptOptimizer {
+  /**
+   * Initialize the Cohere client with the provided API key
+   */
+  static initializeClient(apiKey: string): void {
+    cohereClient = new CohereClient({ 
+      token: apiKey 
+    });
+  }
+
   static async optimizePrompt(
     userPrompt: string,
     platform: string,
@@ -26,79 +45,162 @@ export class PromptOptimizer {
     options: OptimizationOptions,
     mode: "system" | "normal" = "normal"
   ): Promise<OptimizationResult> {
-    // Get system prompt for platform
-    const systemPrompt = getSystemPromptByPlatform(platform);
+    // Calculate token counts (rough estimate)
+    const originalTokens = this.estimateTokens(userPrompt);
     
-    // Analyze the original prompt
-    const analysis = PromptEngineer.analyzePrompt(userPrompt);
-    
-    let optimizedPrompt = "";
-    const appliedTechniques: string[] = [];
-    
-    // Apply mode-specific optimization
-    if (mode === "system") {
-      optimizedPrompt = ModeOptimizer.optimizeForSystemPrompt(userPrompt, domain, analysis, options, platform);
-      appliedTechniques.push("System Prompt Optimization", "Platform-Specific Formatting");
-      
-      if (options.usePersona) appliedTechniques.push("Role Definition");
-      if (options.useConstraints) appliedTechniques.push("Structured Guidelines");
-    } else {
-      optimizedPrompt = ModeOptimizer.optimizeForNormalPrompt(userPrompt, domain, analysis, options, platform);
-      appliedTechniques.push("Normal Prompt Optimization", "Conversational Enhancement");
-      
-      if (options.usePersona || options.useRolePlay) appliedTechniques.push("Persona Integration");
-      
-      // Apply additional optimization techniques for normal mode
-      if (options.useTreeOfThoughts && analysis.complexity === 'expert') {
-        optimizedPrompt = PromptEngineer.applyTreeOfThoughts(optimizedPrompt);
-        appliedTechniques.push('Tree of Thoughts');
-      } else if (options.useChainOfThought && analysis.complexity !== 'simple') {
-        optimizedPrompt = PromptEngineer.applyChainOfThought(optimizedPrompt);
-        appliedTechniques.push('Chain of Thought');
-      }
-      
-      if (options.useSelfConsistency && analysis.intent === 'problem_solving') {
-        optimizedPrompt = PromptEngineer.applySelfConsistency(optimizedPrompt);
-        appliedTechniques.push('Self Consistency');
-      }
-      
-      if (options.useReAct && analysis.intent === 'problem_solving') {
-        optimizedPrompt = PromptEngineer.applyReActPattern(optimizedPrompt);
-        appliedTechniques.push('ReAct Pattern');
+    // If no API key has been provided yet, use a basic optimization
+    if (!cohereClient) {
+      return this.createMockOptimizationResult(userPrompt, platform, domain, options, mode);
+    }
+
+    try {
+      // Prepare the optimization techniques as a string
+      const techniquesString = Object.entries(options)
+        .filter(([_, enabled]) => enabled)
+        .map(([technique]) => {
+          // Convert camelCase to readable format
+          return technique
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, (str) => str.toUpperCase())
+            .replace('Use ', '');
+        })
+        .join(', ');
+
+      // Prepare the prompt for Cohere
+      const promptForCohere = `
+        Optimize the following prompt for the ${platform} AI platform, focusing on the ${domain} domain.
+        
+        Original prompt: "${userPrompt}"
+        
+        Mode: ${mode === "system" ? "System prompt (instructions for the AI)" : "Normal prompt (direct user query)"}
+        
+        Apply these optimization techniques: ${techniquesString}
+        
+        Provide the optimized prompt and an analysis including:
+        - Complexity assessment (simple, moderate, complex, expert)
+        - Intent classification
+        - Estimated response time
+        - Strengths and weaknesses of the original prompt
+        - Estimated improvement percentage
+        
+        Format your response as JSON with the following structure:
+        {
+          "optimizedPrompt": "string",
+          "analysis": {
+            "complexity": "string",
+            "intent": "string",
+            "domain": "string",
+            "estimatedResponseTime": number,
+            "strengths": ["string"],
+            "weaknesses": ["string"]
+          },
+          "appliedTechniques": ["string"],
+          "estimatedImprovement": number
+        }
+      `;
+
+      // Call Cohere API
+      const response = await cohereClient.chat({
+        message: promptForCohere,
+        model: "command",
+        temperature: 0.4
+      });
+
+      // Parse the response to extract the optimization result
+      try {
+        // The response might be in the text or in a structured format
+        const responseText = response.text;
+        // Try to extract JSON from the response
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const cohereResult = JSON.parse(jsonMatch[0]);
+          
+          // Calculate optimized token count
+          const optimizedTokens = this.estimateTokens(cohereResult.optimizedPrompt);
+          
+          // Construct the final result
+          return {
+            originalPrompt: userPrompt,
+            optimizedPrompt: cohereResult.optimizedPrompt,
+            systemPrompt: null, // We're not using system prompts directly
+            analysis: cohereResult.analysis,
+            appliedTechniques: cohereResult.appliedTechniques || [],
+            estimatedImprovement: cohereResult.estimatedImprovement || 0,
+            tokenCount: {
+              original: originalTokens,
+              optimized: optimizedTokens
+            },
+            domain,
+            mode
+          };
+        }
+      } catch (parseError) {
+        console.error("Error parsing Cohere response:", parseError);
       }
 
-      if (options.useFewShot && analysis.complexity === 'complex') {
-        const examples = this.getExamplesForDomain(domain);
-        if (examples.length > 0) {
-          optimizedPrompt = PromptEngineer.applyFewShotLearning(optimizedPrompt, examples);
-          appliedTechniques.push('Few-Shot Learning');
-        }
-      }
-      
-      if (options.optimizeForTokens) {
-        optimizedPrompt = PromptEngineer.optimizeForTokens(optimizedPrompt);
-        appliedTechniques.push('Token Optimization');
-      }
+      // Fallback to mock result if parsing fails
+      return this.createMockOptimizationResult(userPrompt, platform, domain, options, mode);
+    } catch (error) {
+      console.error("Error calling Cohere API:", error);
+      // Fallback to mock result if API call fails
+      return this.createMockOptimizationResult(userPrompt, platform, domain, options, mode);
+    }
+  }
+
+  /**
+   * Create a mock optimization result for testing or when API is unavailable
+   */
+  private static createMockOptimizationResult(
+    userPrompt: string,
+    platform: string,
+    domain: string,
+    options: OptimizationOptions,
+    mode: "system" | "normal"
+  ): OptimizationResult {
+    // Simple enhancement of the prompt based on selected options
+    let optimizedPrompt = userPrompt;
+    const appliedTechniques: string[] = [];
+    
+    // Apply selected techniques (simplified mock implementation)
+    if (options.usePersona) {
+      optimizedPrompt = `As an expert in ${domain}, ${optimizedPrompt}`;
+      appliedTechniques.push('Expert Persona');
+    }
+    
+    if (options.useChainOfThought) {
+      optimizedPrompt = `${optimizedPrompt}\n\nPlease think through this step-by-step with clear reasoning.`;
+      appliedTechniques.push('Chain of Thought');
+    }
+    
+    if (options.useConstraints) {
+      optimizedPrompt = `${optimizedPrompt}\n\nProvide a comprehensive, well-structured response with practical examples.`;
+      appliedTechniques.push('Advanced Constraints');
+    }
+    
+    if (mode === "system") {
+      optimizedPrompt = `# ${platform} System Instructions\n\n${optimizedPrompt}\n\nRespond in a helpful, accurate, and engaging manner.`;
+      appliedTechniques.push('System Prompt Optimization');
     }
     
     // Calculate token counts
     const originalTokens = this.estimateTokens(userPrompt);
     const optimizedTokens = this.estimateTokens(optimizedPrompt);
     
-    // Estimate improvement score
-    const estimatedImprovement = this.calculateImprovementScore(
-      analysis,
-      appliedTechniques.length,
-      options,
-      domain,
-      mode
-    );
+    // Calculate improvement score (mock implementation)
+    const estimatedImprovement = Math.min(70 + appliedTechniques.length * 5, 95);
     
     return {
       originalPrompt: userPrompt,
       optimizedPrompt,
-      systemPrompt,
-      analysis,
+      systemPrompt: null,
+      analysis: {
+        complexity: userPrompt.length > 100 ? "complex" : "moderate",
+        intent: userPrompt.includes("?") ? "question" : "instruction",
+        domain,
+        estimatedResponseTime: Math.ceil(optimizedTokens / 20),
+        strengths: ["Clear objective"],
+        weaknesses: ["Could be more specific"]
+      },
       appliedTechniques,
       estimatedImprovement,
       tokenCount: {
@@ -110,126 +212,10 @@ export class PromptOptimizer {
     };
   }
   
-  private static getExamplesForDomain(domain: string): Array<{input: string, output: string}> {
-    const exampleSets = {
-      technology: [
-        {
-          input: "Write a function to sort an array",
-          output: "```javascript\nfunction sortArray(arr) {\n  return arr.sort((a, b) => a - b);\n}\n```"
-        },
-        {
-          input: "Explain REST API design",
-          output: "REST APIs follow these principles:\n1. Stateless communication\n2. Resource-based URLs\n3. HTTP methods (GET, POST, PUT, DELETE)\n4. JSON data format"
-        }
-      ],
-      creative: [
-        {
-          input: "Write a short story about time travel",
-          output: "The pocket watch ticked backwards as Sarah realized she had exactly thirty minutes to prevent the accident that would change everything..."
-        },
-        {
-          input: "Create a poem about nature",
-          output: "Whispers of wind through ancient trees,\nDancing shadows, rustling leaves,\nNature's symphony plays for free,\nA masterpiece for all to see."
-        }
-      ],
-      business: [
-        {
-          input: "Analyze market trends",
-          output: "Market Analysis:\n1. Current trends\n2. Growth indicators\n3. Risk factors\n4. Recommendations"
-        }
-      ],
-      academic: [
-        {
-          input: "Structure a research paper",
-          output: "Research Paper Structure:\n1. Abstract\n2. Introduction\n3. Literature Review\n4. Methodology\n5. Results\n6. Discussion\n7. Conclusion"
-        }
-      ]
-    };
-    
-    return exampleSets[domain as keyof typeof exampleSets] || [];
-  }
-  
-  private static addAdvancedConstraints(prompt: string, analysis: PromptAnalysis, domain: string): string {
-    const constraints = [];
-    
-    if (analysis.complexity === 'expert') {
-      constraints.push("Provide detailed, expert-level explanations with technical depth");
-    }
-    
-    if (analysis.intent === 'creative') {
-      constraints.push("Be original and imaginative while maintaining coherence and quality");
-    }
-    
-    if (domain === 'technology') {
-      constraints.push("Include code examples, best practices, and technical considerations");
-    }
-    
-    if (domain === 'medical') {
-      constraints.push("Emphasize the importance of professional medical consultation");
-    }
-    
-    if (domain === 'legal') {
-      constraints.push("Include appropriate legal disclaimers and emphasize professional legal advice");
-    }
-    
-    if (analysis.estimatedTokens > 100) {
-      constraints.push("Structure the response with clear sections and headings");
-    }
-    
-    if (constraints.length === 0) return prompt;
-    
-    return `${prompt}
-
-Advanced Constraints:
-${constraints.map(c => `• ${c}`).join('\n')}`;
-  }
-  
-  private static integrateSystemPrompt(userPrompt: string, systemPrompt: SystemPrompt): string {
-    return systemPrompt.template
-      .replace('{user_prompt}', userPrompt)
-      .replace('{current_date}', new Date().toISOString().split('T')[0])
-      .replace('{tools_available}', 'web_search, code_execution, image_analysis')
-      .replace('{context}', 'User interaction')
-      .replace('{programming_language}', 'JavaScript/TypeScript');
-  }
-  
+  /**
+   * Estimate token count from text (simple approximation)
+   */
   private static estimateTokens(text: string): number {
-    return Math.ceil(text.split(' ').length * 1.3);
-  }
-  
-  private static calculateImprovementScore(
-    analysis: PromptAnalysis,
-    techniquesApplied: number,
-    options: OptimizationOptions,
-    domain: string,
-    mode: "system" | "normal"
-  ): number {
-    let baseScore = 60;
-    
-    // Add points for mode-specific optimization
-    if (mode === 'system') {
-      baseScore += 10; // System prompts get higher base improvement
-    }
-    
-    // Add points for complexity handling
-    if (analysis.complexity === 'complex' || analysis.complexity === 'expert') {
-      baseScore += 15;
-    }
-    
-    // Add points for each technique applied
-    baseScore += techniquesApplied * 4;
-    
-    // Add points for optimization options used
-    if (options.useChainOfThought) baseScore += 8;
-    if (options.usePersona) baseScore += 6;
-    if (options.useReAct) baseScore += 10;
-    if (options.useTreeOfThoughts) baseScore += 12;
-    if (options.useSelfConsistency) baseScore += 9;
-    if (options.useRolePlay) baseScore += 7;
-    
-    // Add points for domain-specific optimization
-    if (domain !== 'general') baseScore += 5;
-    
-    return Math.min(baseScore, 95);
+    return Math.ceil(text.split(/\s+/).length * 1.3);
   }
 }

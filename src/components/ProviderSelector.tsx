@@ -1,4 +1,3 @@
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Cloud, Zap, Globe, Bot, Brain, Sparkles, Server, Database, Cpu } from "lucide-react";
@@ -10,12 +9,12 @@ interface ProviderSelectorProps {
 
 export const ProviderSelector = ({ value, onChange }: ProviderSelectorProps) => {
   const providers = [
+    { id: "cohere", name: "Cohere", icon: Globe || Cloud, description: "Command models for prompt optimization" },
     { id: "openai", name: "OpenAI", icon: Bot || Cloud, description: "GPT models directly from OpenAI" },
     { id: "anthropic", name: "Anthropic", icon: Brain || Cloud, description: "Claude models from Anthropic" },
     { id: "google", name: "Google AI", icon: Sparkles || Cloud, description: "Gemini models from Google" },
     { id: "groq", name: "Groq", icon: Zap || Cloud, description: "Ultra-fast inference with LPU" },
     { id: "aiml", name: "AI/ML API", icon: Cloud || Bot, description: "Reliable and affordable access" },
-    { id: "cohere", name: "Cohere", icon: Globe || Cloud, description: "Enterprise-ready AI platform" },
     { id: "together", name: "Together AI", icon: Server || Cloud, description: "Open source models at scale" },
     { id: "fireworks", name: "Fireworks AI", icon: Zap || Cloud, description: "Fast inference for popular models" },
     { id: "replicate", name: "Replicate", icon: Database || Cloud, description: "Run open source models" },
@@ -32,7 +31,7 @@ export const ProviderSelector = ({ value, onChange }: ProviderSelectorProps) => 
       <Label className="text-sm font-medium text-gray-700">
         AI Provider
       </Label>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={onChange} defaultValue="cohere">
         <SelectTrigger className="border-gray-300 focus:border-blue-500 focus:ring-blue-500">
           <SelectValue placeholder="Select AI provider" />
         </SelectTrigger>

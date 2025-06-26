@@ -1,3 +1,9 @@
+import { CohereClient } from 'cohere-ai';
+
+// Initialize Cohere client
+// Note: API key will be provided by the user through the UI
+let cohereClient: CohereClient | null = null;
+
 export interface PromptQualityScore {
   clarity: number;       // 1-10 scale
   specificity: number;   // 1-10 scale
@@ -12,15 +18,71 @@ export interface PromptQualityScore {
 
 export class SemanticAnalyzer {
   /**
-   * Analyze prompt quality using a rule-based approach
+   * Initialize the Cohere client with the provided API key
    */
-  static async analyzePromptQuality(prompt: string): Promise<PromptQualityScore> {
-    // Basic analysis (rule-based)
-    return this.basicPromptAnalysis(prompt);
+  static initializeClient(apiKey: string): void {
+    cohereClient = new CohereClient({ 
+      token: apiKey 
+    });
   }
 
   /**
-   * Basic rule-based prompt analysis
+   * Analyze prompt quality using Cohere's API
+   */
+  static async analyzePromptQuality(prompt: string): Promise<PromptQualityScore> {
+    // If no API key has been provided yet, use a basic analysis
+    if (!cohereClient) {
+      return this.basicPromptAnalysis(prompt);
+    }
+
+    try {
+      // Use Cohere's API to analyze the prompt
+      const response = await cohereClient.chat({
+        message: `Analyze this prompt for quality: "${prompt}". 
+                  Rate it on clarity (1-10), specificity (1-10), and effectiveness (1-10). 
+                  Also identify if it's vague, overly broad, or lacks context. 
+                  Provide 2-3 suggestions for improvement.
+                  Format your response as JSON with the following structure:
+                  {
+                    "clarity": number,
+                    "specificity": number,
+                    "effectiveness": number,
+                    "issues": {
+                      "isVague": boolean,
+                      "isOverlyBroad": boolean,
+                      "lacksContext": boolean,
+                      "suggestions": string[]
+                    }
+                  }`,
+        model: "command",
+        temperature: 0.3
+      });
+
+      // Parse the response to extract the analysis
+      try {
+        // The response might be in the text or in a structured format
+        const responseText = response.text;
+        // Try to extract JSON from the response
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const analysisResult = JSON.parse(jsonMatch[0]) as PromptQualityScore;
+          return analysisResult;
+        }
+      } catch (parseError) {
+        console.error("Error parsing Cohere response:", parseError);
+      }
+
+      // Fallback to basic analysis if parsing fails
+      return this.basicPromptAnalysis(prompt);
+    } catch (error) {
+      console.error("Error calling Cohere API:", error);
+      // Fallback to basic analysis if API call fails
+      return this.basicPromptAnalysis(prompt);
+    }
+  }
+
+  /**
+   * Basic rule-based prompt analysis as a fallback
    */
   private static basicPromptAnalysis(prompt: string): PromptQualityScore {
     // Handle empty or whitespace-only prompts
