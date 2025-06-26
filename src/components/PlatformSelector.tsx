@@ -1,7 +1,6 @@
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Bot, Brain, Sparkles, Cpu, Zap, Globe, Code, MessageSquare, Crown, Star, Hammer, Building, Wrench, Terminal, FileCode, Rocket } from "lucide-react";
+import { Bot, Brain, Sparkles, Cpu, Zap, Globe, Code, MessageSquare, Crown, Star, Hammer, Building, Wrench, Terminal, FileCode, Rocket, Camera, Brush, Palette, Image } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface PlatformSelectorProps {
@@ -45,12 +44,26 @@ export const PlatformSelector = ({ value, onChange }: PlatformSelectorProps) => 
     { id: "grok-3", name: "Grok 3", icon: Star, description: "xAI's latest model", category: "AI Models", provider: "xAI" },
     { id: "grok-2", name: "Grok 2", icon: Star, description: "xAI's reasoning model", category: "AI Models", provider: "xAI" },
     { id: "perplexity-70b", name: "Perplexity 70B", icon: Globe, description: "Search-augmented", category: "AI Models", provider: "Perplexity" },
-    { id: "cohere-command-r-plus", name: "Command R+", icon: MessageSquare, description: "Enhanced enterprise model", category: "AI Models", provider: "Cohere" },
-    { id: "cohere-command-r", name: "Command R", icon: MessageSquare, description: "Enterprise model", category: "AI Models", provider: "Cohere" },
+    
+    { id: "command-r-plus", name: "Command R+", icon: MessageSquare, description: "Enhanced enterprise model", category: "AI Models", provider: "Cohere" },
+    { id: "command-r", name: "Command R", icon: MessageSquare, description: "Enterprise model", category: "AI Models", provider: "Cohere" },
+    { id: "command-light", name: "Command Light", icon: MessageSquare, description: "Lightweight model", category: "AI Models", provider: "Cohere" },
+    { id: "command", name: "Command", icon: MessageSquare, description: "Standard model", category: "AI Models", provider: "Cohere" },
+    
     { id: "deepseek-r1", name: "DeepSeek R1", icon: Code, description: "Latest reasoning model", category: "AI Models", provider: "DeepSeek" },
     { id: "deepseek-coder-v2", name: "DeepSeek Coder V2", icon: Code, description: "Advanced code specialist", category: "AI Models", provider: "DeepSeek" },
     { id: "qwen-max", name: "Qwen Max", icon: Star, description: "Alibaba's flagship", category: "AI Models", provider: "Alibaba" },
     { id: "qwen-2.5-coder", name: "Qwen 2.5 Coder", icon: Code, description: "Specialized coding model", category: "AI Models", provider: "Alibaba" },
+    
+    // Image Generation Models
+    { id: "dall-e-3", name: "DALL-E 3", icon: Image, description: "OpenAI's advanced image generator", category: "Image Generation Models", provider: "OpenAI" },
+    { id: "dall-e-2", name: "DALL-E 2", icon: Image, description: "OpenAI's image generator", category: "Image Generation Models", provider: "OpenAI" },
+    { id: "midjourney-v6", name: "Midjourney v6", icon: Palette, description: "Latest artistic image generator", category: "Image Generation Models", provider: "Midjourney" },
+    { id: "midjourney-v5", name: "Midjourney v5", icon: Palette, description: "Artistic image generator", category: "Image Generation Models", provider: "Midjourney" },
+    { id: "stable-diffusion-xl", name: "Stable Diffusion XL", icon: Brush, description: "High-quality open source model", category: "Image Generation Models", provider: "Stability AI" },
+    { id: "stable-diffusion-3", name: "Stable Diffusion 3", icon: Brush, description: "Latest open source model", category: "Image Generation Models", provider: "Stability AI" },
+    { id: "imagen-2", name: "Imagen 2", icon: Camera, description: "Google's image generator", category: "Image Generation Models", provider: "Google" },
+    { id: "firefly", name: "Firefly", icon: Brush, description: "Adobe's image generator", category: "Image Generation Models", provider: "Adobe" },
     
     // AI Builders & Tools
     { id: "lovable", name: "Lovable", icon: Building, description: "AI-powered web app builder", category: "AI Builders", provider: "Lovable" },
@@ -81,36 +94,39 @@ export const PlatformSelector = ({ value, onChange }: PlatformSelectorProps) => 
     return acc;
   }, {} as Record<string, typeof platforms>);
 
-  const orderedCategories = ["AI Models", "AI Builders"];
+  const orderedCategories = ["AI Models", "Image Generation Models", "AI Builders"];
 
   const selectedPlatform = platforms.find(p => p.id === value);
 
   const getProviderColor = (provider: string) => {
     const colors: Record<string, string> = {
-      "OpenAI": "bg-green-100 text-green-700 border-green-200",
-      "Anthropic": "bg-orange-100 text-orange-700 border-orange-200",
-      "Google": "bg-blue-100 text-blue-700 border-blue-200",
-      "Meta": "bg-blue-100 text-blue-700 border-blue-200",
-      "Mistral": "bg-purple-100 text-purple-700 border-purple-200",
-      "xAI": "bg-gray-100 text-gray-700 border-gray-200",
-      "Perplexity": "bg-indigo-100 text-indigo-700 border-indigo-200",
-      "Cohere": "bg-teal-100 text-teal-700 border-teal-200",
-      "DeepSeek": "bg-red-100 text-red-700 border-red-200",
-      "Alibaba": "bg-yellow-100 text-yellow-700 border-yellow-200",
+      "OpenAI": "bg-foreground/10 text-foreground border-foreground/20",
+      "Anthropic": "bg-foreground/10 text-foreground border-foreground/20",
+      "Google": "bg-foreground/10 text-foreground border-foreground/20",
+      "Meta": "bg-foreground/10 text-foreground border-foreground/20",
+      "Mistral": "bg-foreground/10 text-foreground border-foreground/20",
+      "xAI": "bg-foreground/10 text-foreground border-foreground/20",
+      "Perplexity": "bg-foreground/10 text-foreground border-foreground/20",
+      "Cohere": "bg-foreground/10 text-foreground border-foreground/20",
+      "DeepSeek": "bg-foreground/10 text-foreground border-foreground/20",
+      "Alibaba": "bg-foreground/10 text-foreground border-foreground/20",
+      "Midjourney": "bg-foreground/10 text-foreground border-foreground/20",
+      "Stability AI": "bg-foreground/10 text-foreground border-foreground/20",
+      "Adobe": "bg-foreground/10 text-foreground border-foreground/20",
     };
-    return colors[provider] || "bg-slate-100 text-slate-700 border-slate-200";
+    return colors[provider] || "bg-foreground/10 text-foreground border-foreground/20";
   };
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label className="text-sm font-semibold text-slate-800">
+        <Label className="text-sm font-semibold text-foreground">
           Target AI Platform
         </Label>
         {selectedPlatform && (
           <Badge 
             variant="outline" 
-            className={`text-xs px-2 py-1 ${getProviderColor(selectedPlatform.provider)}`}
+            className={`text-xs px-2 py-1 sketch-border ${getProviderColor(selectedPlatform.provider)}`}
           >
             {selectedPlatform.provider}
           </Badge>
@@ -118,23 +134,25 @@ export const PlatformSelector = ({ value, onChange }: PlatformSelectorProps) => 
       </div>
       
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-12 border-slate-300 bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all duration-200 shadow-sm">
-          <SelectValue placeholder="Choose your AI platform" className="text-slate-600" />
+        <SelectTrigger className="h-12 border-foreground/30 bg-white hover:border-foreground/50 focus:border-foreground focus:ring-2 focus:ring-foreground/10 transition-all duration-200 shadow-sm sketch-input">
+          <SelectValue placeholder="Choose your AI platform" className="text-foreground/80" />
         </SelectTrigger>
-        <SelectContent className="max-h-80 w-full min-w-[400px] bg-white border-slate-200 shadow-lg">
+        <SelectContent className="max-h-80 w-full min-w-[400px] bg-white border-foreground/20 shadow-lg sketch-card">
           {orderedCategories.map((category) => {
             const categoryPlatforms = groupedPlatforms[category] || [];
             return (
               <div key={category} className="py-1">
-                <div className="px-3 py-2 text-xs font-bold text-slate-600 bg-slate-50 border-b border-slate-100 sticky top-0 z-10">
+                <div className="px-3 py-2 text-xs font-bold text-foreground/70 bg-secondary border-b border-foreground/10 sticky top-0 z-10">
                   <div className="flex items-center gap-2">
                     {category === "AI Models" ? (
                       <Brain className="w-3 h-3" />
+                    ) : category === "Image Generation Models" ? (
+                      <Image className="w-3 h-3" />
                     ) : (
                       <Hammer className="w-3 h-3" />
                     )}
                     {category}
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5 sketch-border">
                       {categoryPlatforms.length}
                     </Badge>
                   </div>
@@ -145,25 +163,25 @@ export const PlatformSelector = ({ value, onChange }: PlatformSelectorProps) => 
                     <SelectItem 
                       key={platform.id} 
                       value={platform.id}
-                      className="py-3 px-3 cursor-pointer hover:bg-slate-50 focus:bg-blue-50 data-[highlighted]:bg-blue-50 transition-colors duration-150"
+                      className="py-3 px-3 cursor-pointer hover:bg-secondary focus:bg-foreground/5 data-[highlighted]:bg-foreground/5 transition-colors duration-150"
                     >
                       <div className="flex items-center gap-3 w-full">
                         <div className="flex-shrink-0">
-                          <IconComponent className="w-5 h-5 text-slate-600" />
+                          <IconComponent className="w-5 h-5 text-foreground/80" />
                         </div>
                         <div className="flex-1 min-w-0 space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-slate-900 truncate">
+                            <span className="font-medium text-foreground truncate">
                               {platform.name}
                             </span>
                             <Badge 
                               variant="outline" 
-                              className={`text-xs px-1.5 py-0.5 ${getProviderColor(platform.provider)}`}
+                              className={`text-xs px-1.5 py-0.5 sketch-border ${getProviderColor(platform.provider)}`}
                             >
                               {platform.provider}
                             </Badge>
                           </div>
-                          <p className="text-xs text-slate-500 truncate">
+                          <p className="text-xs text-foreground/60 truncate">
                             {platform.description}
                           </p>
                         </div>
@@ -178,21 +196,21 @@ export const PlatformSelector = ({ value, onChange }: PlatformSelectorProps) => 
       </Select>
       
       {selectedPlatform && (
-        <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+        <div className="bg-secondary rounded-lg p-3 border border-foreground/20 sketch-card">
           <div className="flex items-start gap-3">
-            <selectedPlatform.icon className="w-5 h-5 text-slate-600 mt-0.5 flex-shrink-0" />
+            <selectedPlatform.icon className="w-5 h-5 text-foreground/80 mt-0.5 flex-shrink-0" />
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-slate-900">{selectedPlatform.name}</span>
+                <span className="text-sm font-medium text-foreground">{selectedPlatform.name}</span>
                 <Badge 
                   variant="outline" 
-                  className={`text-xs ${getProviderColor(selectedPlatform.provider)}`}
+                  className={`text-xs sketch-border ${getProviderColor(selectedPlatform.provider)}`}
                 >
                   {selectedPlatform.provider}
                 </Badge>
               </div>
-              <p className="text-xs text-slate-600">{selectedPlatform.description}</p>
-              <Badge variant="secondary" className="text-xs">
+              <p className="text-xs text-foreground/70">{selectedPlatform.description}</p>
+              <Badge variant="secondary" className="text-xs sketch-border">
                 {selectedPlatform.category}
               </Badge>
             </div>
