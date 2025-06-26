@@ -176,7 +176,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold relative inline-flex items-center">
-                  PromptForge
+                  PromptForger
                   <div className="absolute -bottom-1 left-0 w-full h-1 bg-foreground/20 transform -skew-x-12 transition-transform group-hover:skew-x-0"></div>
                 </h1>
                 <p className="text-sm text-foreground/70">AI Prompt Optimizer</p>
