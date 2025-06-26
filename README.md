@@ -340,6 +340,7 @@ git push origin feature/amazing-feature
 ## 🎉 Community & Support
 
 <div align="center">
+
 [![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-181717?style=for-the-badge&logo=github)](https://github.com/Kedhareswer/platform-prompt-alchemy-lab/discussions)
 
 </div>
@@ -352,7 +353,7 @@ git push origin feature/amazing-feature
 
   <a href="https://github.com/Kedhareswer/platform-prompt-alchemy-lab/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=Kedhareswer/platform-prompt-alchemy-lab" />
-    
+
   </a>
 </div>
 
