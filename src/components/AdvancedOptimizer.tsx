@@ -16,7 +16,8 @@ import {
   TreePine, 
   CheckCircle, 
   UserCheck,
-  Sparkles 
+  Sparkles,
+  Heart
 } from "lucide-react";
 import { OptimizationOptions } from "@/utils/promptEngineering";
 import { OptimizationMode } from "./OptimizationModeSelector";
