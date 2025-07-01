@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Heart, AlertTriangle, Zap, Users, Briefcase, Smile, Shield, MessageCircle } from "lucide-react";
 import { EmotionalTone, EmotionalIntensity, EmotionalAnalysis } from "@/utils/emotionalPrompting";
