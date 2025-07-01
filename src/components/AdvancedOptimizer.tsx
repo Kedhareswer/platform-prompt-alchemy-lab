@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -18,8 +19,10 @@ import {
   Sparkles 
 } from "lucide-react";
 import { OptimizationOptions } from "@/utils/promptEngineering";
+import { OptimizationMode } from "./OptimizationModeSelector";
 
 interface AdvancedOptimizerProps {
+  mode: OptimizationMode;
   options: OptimizationOptions;
   onOptionsChange: (options: OptimizationOptions) => void;
   onOptimize: () => void;
@@ -27,6 +30,7 @@ interface AdvancedOptimizerProps {
 }
 
 export const AdvancedOptimizer = ({
+  mode,
   options,
   onOptionsChange,
   onOptimize,
@@ -39,98 +43,168 @@ export const AdvancedOptimizer = ({
     });
   };
 
-  const optimizationTechniques = [
+  const getNormalTechniques = () => [
     {
       id: "useChainOfThought" as keyof OptimizationOptions,
       name: "Chain of Thought",
       description: "Break down complex problems into step-by-step reasoning",
       icon: Brain,
-      recommended: true,
-      category: "Reasoning"
+      recommended: true
     },
     {
       id: "useTreeOfThoughts" as keyof OptimizationOptions,
       name: "Tree of Thoughts",
       description: "Explore multiple solution paths for complex problems",
       icon: TreePine,
-      recommended: false,
-      category: "Reasoning"
+      recommended: false
     },
     {
       id: "useSelfConsistency" as keyof OptimizationOptions,
       name: "Self Consistency",
       description: "Generate multiple solutions and cross-verify for accuracy",
       icon: CheckCircle,
-      recommended: false,
-      category: "Reasoning"
+      recommended: false
     },
     {
       id: "useReAct" as keyof OptimizationOptions,
       name: "ReAct Pattern",
       description: "Combine reasoning and acting for problem-solving tasks",
       icon: Zap,
-      recommended: false,
-      category: "Reasoning"
+      recommended: false
     },
     {
       id: "usePersona" as keyof OptimizationOptions,
       name: "Expert Persona",
       description: "Add professional expertise and domain knowledge",
       icon: Users,
-      recommended: true,
-      category: "Context"
-    },
-    {
-      id: "useRolePlay" as keyof OptimizationOptions,
-      name: "Role Playing",
-      description: "Simulate expert roles for specialized responses",
-      icon: UserCheck,
-      recommended: false,
-      category: "Context"
-    },
-    {
-      id: "useFewShot" as keyof OptimizationOptions,
-      name: "Few-Shot Examples",
-      description: "Include relevant examples to guide response format",
-      icon: Target,
-      recommended: false,
-      category: "Context"
-    },
-    {
-      id: "useContextPrompting" as keyof OptimizationOptions,
-      name: "Context Prompting",
-      description: "Add structured context and background information",
-      icon: Target,
-      recommended: true,
-      category: "Context"
-    },
-    {
-      id: "useEmotionalPrompting" as keyof OptimizationOptions,
-      name: "Emotional Intelligence",
-      description: "Apply appropriate emotional tone and language",
-      icon: Users,
-      recommended: false,
-      category: "Context"
+      recommended: true
     },
     {
       id: "useConstraints" as keyof OptimizationOptions,
       name: "Advanced Constraints",
       description: "Add specific guidelines and quality requirements",
       icon: Shield,
-      recommended: true,
-      category: "Structure"
+      recommended: true
     },
     {
       id: "optimizeForTokens" as keyof OptimizationOptions,
       name: "Token Optimization",
       description: "Reduce unnecessary words while maintaining clarity",
       icon: Minimize,
-      recommended: false,
-      category: "Efficiency"
+      recommended: false
     }
   ];
 
-  const categories = ["Reasoning", "Context", "Structure", "Efficiency"];
+  const getContextTechniques = () => [
+    {
+      id: "useContextPrompting" as keyof OptimizationOptions,
+      name: "Situational Context",
+      description: "Add current situation and environmental context",
+      icon: Target,
+      recommended: true
+    },
+    {
+      id: "usePersona" as keyof OptimizationOptions,
+      name: "Background Context",
+      description: "Include relevant history and previous information",
+      icon: Users,
+      recommended: true
+    },
+    {
+      id: "useConstraints" as keyof OptimizationOptions,
+      name: "Domain Context",
+      description: "Add domain-specific requirements and constraints",
+      icon: Shield,
+      recommended: true
+    },
+    {
+      id: "useFewShot" as keyof OptimizationOptions,
+      name: "Audience Context",
+      description: "Tailor content for specific target audience",
+      icon: UserCheck,
+      recommended: false
+    },
+    {
+      id: "useChainOfThought" as keyof OptimizationOptions,
+      name: "Temporal Context",
+      description: "Add time-sensitive and urgency context",
+      icon: Brain,
+      recommended: false
+    }
+  ];
+
+  const getEmotionalTechniques = () => [
+    {
+      id: "useEmotionalPrompting" as keyof OptimizationOptions,
+      name: "Emotional Tone",
+      description: "Apply appropriate emotional language and tone",
+      icon: Heart,
+      recommended: true
+    },
+    {
+      id: "usePersona" as keyof OptimizationOptions,
+      name: "Empathy Enhancement",
+      description: "Add empathetic understanding and connection",
+      icon: Users,
+      recommended: true
+    },
+    {
+      id: "useRolePlay" as keyof OptimizationOptions,
+      name: "Emotional Role Play",
+      description: "Use emotional personas for better engagement",
+      icon: UserCheck,
+      recommended: false
+    },
+    {
+      id: "useConstraints" as keyof OptimizationOptions,
+      name: "Emotional Constraints",
+      description: "Balance emotional impact with appropriateness",
+      icon: Shield,
+      recommended: true
+    },
+    {
+      id: "useFewShot" as keyof OptimizationOptions,
+      name: "Emotional Examples",
+      description: "Include emotionally resonant examples",
+      icon: Target,
+      recommended: false
+    }
+  ];
+
+  const getCurrentTechniques = () => {
+    switch (mode) {
+      case "context":
+        return getContextTechniques();
+      case "emotional":
+        return getEmotionalTechniques();
+      default:
+        return getNormalTechniques();
+    }
+  };
+
+  const getModeTitle = () => {
+    switch (mode) {
+      case "context":
+        return "Context Optimization";
+      case "emotional":
+        return "Emotional Optimization";
+      default:
+        return "Normal Optimization";
+    }
+  };
+
+  const getModeDescription = () => {
+    switch (mode) {
+      case "context":
+        return "Enhance your prompt with rich contextual information";
+      case "emotional":
+        return "Optimize for emotional intelligence and engagement";
+      default:
+        return "Apply advanced prompt engineering techniques";
+    }
+  };
+
+  const techniques = getCurrentTechniques();
   const enabledCount = Object.values(options).filter(Boolean).length;
 
   return (
@@ -138,10 +212,10 @@ export const AdvancedOptimizer = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-2xl text-gray-800">
           <Sparkles className="w-6 h-6 text-blue-600" />
-          Optimization Techniques
+          {getModeTitle()}
         </CardTitle>
         <CardDescription>
-          Select techniques to enhance your prompt for better AI responses
+          {getModeDescription()}
           <Badge variant="outline" className="ml-2">
             {enabledCount} selected
           </Badge>
@@ -149,60 +223,44 @@ export const AdvancedOptimizer = ({
       </CardHeader>
       
       <CardContent className="space-y-6">
-        {categories.map((category) => (
-          <div key={category}>
-            <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
-              {category === "Reasoning" && <Brain className="w-5 h-5" />}
-              {category === "Context" && <Users className="w-5 h-5" />}
-              {category === "Structure" && <Shield className="w-5 h-5" />}
-              {category === "Efficiency" && <Minimize className="w-5 h-5" />}
-              {category}
-            </h3>
-            
-            <div className="grid gap-3">
-              {optimizationTechniques
-                .filter(technique => technique.category === category)
-                .map((technique) => (
-                  <div
-                    key={technique.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
-                      options[technique.id] 
-                        ? 'border-blue-300 bg-blue-50' 
-                        : 'border-gray-200 bg-white hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-start space-x-3 flex-1">
-                      <technique.icon className={`w-5 h-5 mt-0.5 ${
-                        options[technique.id] ? 'text-blue-600' : 'text-gray-400'
-                      }`} />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <Label className="font-medium text-gray-900">
-                            {technique.name}
-                          </Label>
-                          {technique.recommended && (
-                            <Badge variant="secondary" className="text-xs">
-                              Recommended
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {technique.description}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <Switch
-                      checked={options[technique.id]}
-                      onCheckedChange={(checked) => updateOption(technique.id, checked)}
-                    />
+        <div className="grid gap-3">
+          {techniques.map((technique) => (
+            <div
+              key={technique.id}
+              className={`flex items-center justify-between p-4 rounded-lg border transition-all ${
+                options[technique.id] 
+                  ? 'border-blue-300 bg-blue-50' 
+                  : 'border-gray-200 bg-white hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-start space-x-3 flex-1">
+                <technique.icon className={`w-5 h-5 mt-0.5 ${
+                  options[technique.id] ? 'text-blue-600' : 'text-gray-400'
+                }`} />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <Label className="font-medium text-gray-900">
+                      {technique.name}
+                    </Label>
+                    {technique.recommended && (
+                      <Badge variant="secondary" className="text-xs">
+                        Recommended
+                      </Badge>
+                    )}
                   </div>
-                ))}
+                  <p className="text-sm text-gray-600 mt-1">
+                    {technique.description}
+                  </p>
+                </div>
+              </div>
+              
+              <Switch
+                checked={options[technique.id]}
+                onCheckedChange={(checked) => updateOption(technique.id, checked)}
+              />
             </div>
-            
-            {category !== "Efficiency" && <Separator className="my-4" />}
-          </div>
-        ))}
+          ))}
+        </div>
         
         <div className="pt-4">
           <Button 
@@ -219,7 +277,7 @@ export const AdvancedOptimizer = ({
             ) : (
               <>
                 <Sparkles className="w-5 h-5 mr-2" />
-                Generate Optimized Prompt
+                Generate {mode === "normal" ? "Optimized" : mode === "context" ? "Context-Enhanced" : "Emotionally-Optimized"} Prompt
               </>
             )}
           </Button>

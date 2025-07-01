@@ -13,6 +13,7 @@ import { AdvancedOptimizer } from "@/components/AdvancedOptimizer";
 import { OptimizationResults } from "@/components/OptimizationResults";
 import { PromptQualityIndicator } from "@/components/PromptQualityIndicator";
 import { ModeSelector, PromptMode } from "@/components/ModeSelector";
+import { OptimizationModeSelector, OptimizationMode } from "@/components/OptimizationModeSelector";
 import { ExportPrompt } from "@/components/ExportPrompt";
 import { ProviderSelector } from "@/components/ProviderSelector";
 import { ApiKeyManager } from "@/components/ApiKeyManager";
@@ -45,6 +46,7 @@ const Index = () => {
   const [apiKey, setApiKey] = useState("");
   const [selectedDomain, setSelectedDomain] = useState("general");
   const [selectedMode, setSelectedMode] = useState<PromptMode>("normal");
+  const [optimizationMode, setOptimizationMode] = useState<OptimizationMode>("normal");
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [qualityScore, setQualityScore] = useState<PromptQualityScore | null>(null);
@@ -170,8 +172,17 @@ const Index = () => {
         SemanticAnalyzer.initializeClient(apiKey);
       }
       
+      // Apply mode-specific optimizations
+      let enhancedPrompt = userPrompt;
+      
+      if (optimizationMode === "context") {
+        enhancedPrompt = ContextPrompting.applyContextEnhancement(userPrompt, contextInfo, 'detailed');
+      } else if (optimizationMode === "emotional") {
+        enhancedPrompt = EmotionalPrompting.applyEmotionalEnhancement(userPrompt, emotionalTone, emotionalIntensity, selectedDomain);
+      }
+      
       const result = await PromptOptimizer.optimizePrompt(
-        userPrompt, 
+        enhancedPrompt, 
         selectedPlatform, 
         selectedDomain, 
         optimizationOptions, 
@@ -192,9 +203,12 @@ const Index = () => {
       
       setOptimizationResult(enhancedResult);
       
+      const modeText = optimizationMode === "context" ? "Context-Enhanced" : 
+                     optimizationMode === "emotional" ? "Emotionally-Optimized" : "Optimized";
+      
       toast({
-        title: "Prompt Optimized Successfully",
-        description: `Applied ${result.appliedTechniques.length} optimization techniques in ${selectedMode} mode`
+        title: `Prompt ${modeText} Successfully`,
+        description: `Applied ${result.appliedTechniques.length} optimization techniques in ${optimizationMode} mode`
       });
     } catch (error) {
       console.error('Optimization error:', error);
@@ -265,6 +279,7 @@ const Index = () => {
                 />
                 
                 <ModeSelector value={selectedMode} onChange={setSelectedMode} />
+                <OptimizationModeSelector value={optimizationMode} onChange={setOptimizationMode} />
               </CardContent>
             </Card>
 
@@ -304,6 +319,26 @@ const Index = () => {
                 <DomainSelector value={selectedDomain} onChange={setSelectedDomain} />
               </CardContent>
             </Card>
+
+            {/* Mode-specific additional controls */}
+            {optimizationMode === "context" && (
+              <ContextBuilder 
+                analysis={contextAnalysis}
+                contextInfo={contextInfo}
+                onContextChange={setContextInfo}
+              />
+            )}
+
+            {optimizationMode === "emotional" && (
+              <EmotionalToneSelector
+                tone={emotionalTone}
+                intensity={emotionalIntensity}
+                domain={selectedDomain}
+                analysis={emotionalAnalysis}
+                onToneChange={setEmotionalTone}
+                onIntensityChange={setEmotionalIntensity}
+              />
+            )}
           </div>
           
           {/* Center & Right - Optimization & Results */}
@@ -318,6 +353,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <AdvancedOptimizer 
+                  mode={optimizationMode}
                   options={optimizationOptions} 
                   onOptionsChange={setOptimizationOptions} 
                   onOptimize={handleOptimize} 
@@ -350,6 +386,10 @@ const Index = () => {
             <div className="flex items-center gap-4">
               <Badge variant="outline" className="text-xs sketch-border">
                 {selectedMode === "system" ? "System Mode" : "Normal Mode"}
+              </Badge>
+              <Badge variant="outline" className="text-xs sketch-border">
+                {optimizationMode === "normal" ? "Normal Optimization" : 
+                 optimizationMode === "context" ? "Context Optimization" : "Emotional Optimization"}
               </Badge>
               <span>Platform: {selectedPlatform}</span>
               <span>Domain: {selectedDomain}</span>
