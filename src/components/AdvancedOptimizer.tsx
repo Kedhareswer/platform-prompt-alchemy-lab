@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -94,6 +93,22 @@ export const AdvancedOptimizer = ({
       name: "Few-Shot Examples",
       description: "Include relevant examples to guide response format",
       icon: Target,
+      recommended: false,
+      category: "Context"
+    },
+    {
+      id: "useContextPrompting" as keyof OptimizationOptions,
+      name: "Context Prompting",
+      description: "Add structured context and background information",
+      icon: Target,
+      recommended: true,
+      category: "Context"
+    },
+    {
+      id: "useEmotionalPrompting" as keyof OptimizationOptions,
+      name: "Emotional Intelligence",
+      description: "Apply appropriate emotional tone and language",
+      icon: Users,
       recommended: false,
       category: "Context"
     },

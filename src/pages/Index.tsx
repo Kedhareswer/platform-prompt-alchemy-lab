@@ -16,11 +16,15 @@ import { ModeSelector, PromptMode } from "@/components/ModeSelector";
 import { ExportPrompt } from "@/components/ExportPrompt";
 import { ProviderSelector } from "@/components/ProviderSelector";
 import { ApiKeyManager } from "@/components/ApiKeyManager";
+import { ContextBuilder } from "@/components/ContextBuilder";
+import { EmotionalToneSelector } from "@/components/EmotionalToneSelector";
 
 // Utils
 import { OptimizationOptions } from "@/utils/promptEngineering";
 import { PromptOptimizer, OptimizationResult } from "@/utils/promptOptimizer";
 import { SemanticAnalyzer, PromptQualityScore } from "@/utils/semanticAnalysis";
+import { ContextPrompting, ContextInfo, ContextAnalysis } from "@/utils/contextPrompting";
+import { EmotionalPrompting, EmotionalTone, EmotionalIntensity, EmotionalAnalysis } from "@/utils/emotionalPrompting";
 
 // Enhanced type to match OptimizationResults component expectations
 interface EnhancedOptimizationResult extends Omit<OptimizationResult, 'analysis'> {
@@ -46,6 +50,11 @@ const Index = () => {
   const [qualityScore, setQualityScore] = useState<PromptQualityScore | null>(null);
   const [optimizationResult, setOptimizationResult] = useState<EnhancedOptimizationResult | null>(null);
   const [lastAnalyzedPrompt, setLastAnalyzedPrompt] = useState("");
+  const [contextInfo, setContextInfo] = useState<ContextInfo[]>([]);
+  const [contextAnalysis, setContextAnalysis] = useState<ContextAnalysis | null>(null);
+  const [emotionalTone, setEmotionalTone] = useState<EmotionalTone>("neutral");
+  const [emotionalIntensity, setEmotionalIntensity] = useState<EmotionalIntensity>("moderate");
+  const [emotionalAnalysis, setEmotionalAnalysis] = useState<EmotionalAnalysis | null>(null);
   const [optimizationOptions, setOptimizationOptions] = useState<OptimizationOptions>({
     useChainOfThought: true,
     useFewShot: false,
@@ -55,7 +64,9 @@ const Index = () => {
     optimizeForTokens: false,
     useTreeOfThoughts: false,
     useSelfConsistency: false,
-    useRolePlay: false
+    useRolePlay: false,
+    useContextPrompting: false,
+    useEmotionalPrompting: false
   });
   
   const { toast } = useToast();
@@ -86,12 +97,44 @@ const Index = () => {
     }
   }, [lastAnalyzedPrompt]);
   
+  // New function to analyze context
+  const analyzeContext = useCallback(async (prompt: string) => {
+    if (!prompt.trim()) {
+      setContextAnalysis(null);
+      return;
+    }
+    
+    try {
+      const analysis = ContextPrompting.analyzeContext(prompt, selectedDomain);
+      setContextAnalysis(analysis);
+    } catch (error) {
+      console.error('Error analyzing context:', error);
+    }
+  }, [selectedDomain]);
+
+  // New function to analyze emotional appropriateness
+  const analyzeEmotional = useCallback(async (prompt: string) => {
+    if (!prompt.trim()) {
+      setEmotionalAnalysis(null);
+      return;
+    }
+    
+    try {
+      const analysis = EmotionalPrompting.analyzeEmotionalAppropriateness(prompt, selectedDomain, emotionalTone);
+      setEmotionalAnalysis(analysis);
+    } catch (error) {
+      console.error('Error analyzing emotional tone:', error);
+    }
+  }, [selectedDomain, emotionalTone]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       analyzePromptQuality(userPrompt);
+      analyzeContext(userPrompt);
+      analyzeEmotional(userPrompt);
     }, 500);
     return () => clearTimeout(timer);
-  }, [userPrompt, analyzePromptQuality]);
+  }, [userPrompt, analyzePromptQuality, analyzeContext, analyzeEmotional]);
   
   const handleOptimize = async () => {
     if (!userPrompt.trim()) {
@@ -240,7 +283,7 @@ const Index = () => {
                       strokeLinecap="round" 
                       strokeLinejoin="round" 
                       strokeWidth={2} 
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37.996.608 2.296.07 2.572-1.065z" 
                     />
                     <path 
                       strokeLinecap="round" 

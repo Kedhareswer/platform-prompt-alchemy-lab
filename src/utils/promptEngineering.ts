@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 // Define Zod schema for prompt analysis
@@ -20,7 +19,7 @@ export const PromptAnalysisSchema = z.object({
 // Define TypeScript type from Zod schema
 export type PromptAnalysis = z.infer<typeof PromptAnalysisSchema>;
 
-// Define TypeScript type for optimization options
+// Define TypeScript type for optimization options - UPDATED
 export type OptimizationOptions = {
   useChainOfThought: boolean;
   useFewShot: boolean;
@@ -31,6 +30,8 @@ export type OptimizationOptions = {
   useTreeOfThoughts: boolean;
   useSelfConsistency: boolean;
   useRolePlay: boolean;
+  useContextPrompting: boolean;
+  useEmotionalPrompting: boolean;
 };
 
 export class PromptEngineer {
