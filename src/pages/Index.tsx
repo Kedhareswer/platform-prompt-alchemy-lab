@@ -20,124 +20,126 @@ import { ApiKeyManager } from "@/components/ApiKeyManager";
 import { ContextBuilder } from "@/components/ContextBuilder";
 import { EmotionalToneSelector } from "@/components/EmotionalToneSelector";
 
-// Utils
-import { OptimizationOptions } from "@/utils/promptEngineering";
-import { PromptOptimizer, OptimizationResult } from "@/utils/promptOptimizer";
-import { SemanticAnalyzer, PromptQualityScore } from "@/utils/semanticAnalysis";
-import { ContextPrompting, ContextInfo, ContextAnalysis } from "@/utils/contextPrompting";
-import { EmotionalPrompting, EmotionalTone, EmotionalIntensity, EmotionalAnalysis } from "@/utils/emotionalPrompting";
+// Hooks and Services
+import { useAdvancedOptimization } from "@/hooks/useAdvancedOptimization";
+import { useApp } from "@/contexts/AppContext";
 
-// Enhanced type to match OptimizationResults component expectations
-interface EnhancedOptimizationResult extends Omit<OptimizationResult, 'analysis'> {
-  analysis: {
-    complexity: string;
-    intent: string;
-    domain: string;
-    estimatedResponseTime?: number;
-    strengths?: string[];
-    weaknesses?: string[];
-  };
+// Types for API key management
+interface APIKeyStorage {
+  [provider: string]: string;
+}
+
+// Enhanced optimization options for advanced system
+interface EnhancedOptimizationOptions {
+  techniques: string[];
+  domain: string;
+  intent: string;
+  applyDomainSpecific: boolean;
+  useQualityPrediction: boolean;
+  personalized: boolean;
 }
 
 const Index = () => {
+  // Advanced optimization hook
+  const {
+    analyzePrompt,
+    optimizePrompt,
+    currentAnalysis,
+    currentQualityPrediction,
+    optimizationHistory,
+    selectedTechniques,
+    setSelectedTechniques,
+    isAnalyzing,
+    isOptimizing,
+    optimizationSuggestions,
+    canOptimize
+  } = useAdvancedOptimization();
+
+  // App context for global state
+  const { state } = useApp();
+
+  // Local state
   const [userPrompt, setUserPrompt] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState("gpt-4o");
-  const [selectedProvider, setSelectedProvider] = useState("cohere");
-  const [apiKey, setApiKey] = useState("");
+  const [selectedProvider, setSelectedProvider] = useState("openai");
   const [selectedDomain, setSelectedDomain] = useState("general");
   const [selectedMode, setSelectedMode] = useState<PromptMode>("normal");
   const [optimizationMode, setOptimizationMode] = useState<OptimizationMode>("normal");
-  const [isOptimizing, setIsOptimizing] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [qualityScore, setQualityScore] = useState<PromptQualityScore | null>(null);
-  const [optimizationResult, setOptimizationResult] = useState<EnhancedOptimizationResult | null>(null);
   const [lastAnalyzedPrompt, setLastAnalyzedPrompt] = useState("");
-  const [contextInfo, setContextInfo] = useState<ContextInfo[]>([]);
-  const [contextAnalysis, setContextAnalysis] = useState<ContextAnalysis | null>(null);
-  const [emotionalTone, setEmotionalTone] = useState<EmotionalTone>("neutral");
-  const [emotionalIntensity, setEmotionalIntensity] = useState<EmotionalIntensity>("moderate");
-  const [emotionalAnalysis, setEmotionalAnalysis] = useState<EmotionalAnalysis | null>(null);
-  const [optimizationOptions, setOptimizationOptions] = useState<OptimizationOptions>({
-    useChainOfThought: true,
-    useFewShot: false,
-    useReAct: false,
-    usePersona: true,
-    useConstraints: true,
-    optimizeForTokens: false,
-    useTreeOfThoughts: false,
-    useSelfConsistency: false,
-    useRolePlay: false,
-    useContextPrompting: false,
-    useEmotionalPrompting: false
-  });
   
+  // API key management with localStorage
+  const [apiKeys, setApiKeys] = useState<APIKeyStorage>(() => {
+    try {
+      const stored = localStorage.getItem('promptforge_api_keys');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  // Enhanced optimization options
+  const [enhancedOptions, setEnhancedOptions] = useState<EnhancedOptimizationOptions>({
+    techniques: ['meta_instruction', 'constitutional_ai', 'expert_domain_injection'],
+    domain: 'general',
+    intent: 'informational',
+    applyDomainSpecific: true,
+    useQualityPrediction: true,
+    personalized: true
+  });
   const { toast } = useToast();
 
-  // Initialize the Cohere client when the component mounts
-  useEffect(() => {
-    // Initialize with environment variable if available
-    if (import.meta.env.VITE_COHERE_API_KEY) {
-      PromptOptimizer.initializeClient(import.meta.env.VITE_COHERE_API_KEY);
-      SemanticAnalyzer.initializeClient(import.meta.env.VITE_COHERE_API_KEY);
+  // Save API keys to localStorage
+  const saveApiKey = (provider: string, key: string) => {
+    const newApiKeys = { ...apiKeys, [provider]: key };
+    setApiKeys(newApiKeys);
+    try {
+      localStorage.setItem('promptforge_api_keys', JSON.stringify(newApiKeys));
+    } catch (error) {
+      console.error('Failed to save API key:', error);
     }
-  }, []);
+  };
 
-  // Debounce the quality analysis
+  // Get current API key for selected provider
+  const getCurrentApiKey = () => apiKeys[selectedProvider] || "";
+
+  // Real-time prompt analysis with debouncing
   const analyzePromptQuality = useCallback(async (prompt: string) => {
     if (!prompt.trim() || prompt === lastAnalyzedPrompt) {
       return;
     }
-    setIsAnalyzing(true);
     setLastAnalyzedPrompt(prompt);
+    
     try {
-      const qualityAnalysis = await SemanticAnalyzer.analyzePromptQuality(prompt);
-      setQualityScore(qualityAnalysis);
+      await analyzePrompt(prompt, selectedDomain);
     } catch (error) {
       console.error('Error analyzing prompt quality:', error);
-    } finally {
-      setIsAnalyzing(false);
+      toast({
+        title: "Analysis Error",
+        description: "Failed to analyze prompt quality. Please try again.",
+        variant: "destructive"
+      });
     }
-  }, [lastAnalyzedPrompt]);
-  
-  // New function to analyze context
-  const analyzeContext = useCallback(async (prompt: string) => {
-    if (!prompt.trim()) {
-      setContextAnalysis(null);
-      return;
-    }
-    
-    try {
-      const analysis = ContextPrompting.analyzeContext(prompt, selectedDomain);
-      setContextAnalysis(analysis);
-    } catch (error) {
-      console.error('Error analyzing context:', error);
-    }
-  }, [selectedDomain]);
+  }, [lastAnalyzedPrompt, analyzePrompt, selectedDomain, toast]);
 
-  // New function to analyze emotional appropriateness
-  const analyzeEmotional = useCallback(async (prompt: string) => {
-    if (!prompt.trim()) {
-      setEmotionalAnalysis(null);
-      return;
-    }
-    
-    try {
-      const analysis = EmotionalPrompting.analyzeEmotionalAppropriateness(prompt, selectedDomain, emotionalTone);
-      setEmotionalAnalysis(analysis);
-    } catch (error) {
-      console.error('Error analyzing emotional tone:', error);
-    }
-  }, [selectedDomain, emotionalTone]);
-
+  // Debounced analysis effect
   useEffect(() => {
     const timer = setTimeout(() => {
-      analyzePromptQuality(userPrompt);
-      analyzeContext(userPrompt);
-      analyzeEmotional(userPrompt);
+      if (userPrompt.trim()) {
+        analyzePromptQuality(userPrompt);
+      }
     }, 500);
     return () => clearTimeout(timer);
-  }, [userPrompt, analyzePromptQuality, analyzeContext, analyzeEmotional]);
+  }, [userPrompt, analyzePromptQuality]);
+
+  // Update enhanced options when domain changes
+  useEffect(() => {
+    setEnhancedOptions(prev => ({
+      ...prev,
+      domain: selectedDomain
+    }));
+  }, [selectedDomain]);
   
+  // Advanced optimization handler
   const handleOptimize = async () => {
     if (!userPrompt.trim()) {
       toast({
@@ -148,9 +150,8 @@ const Index = () => {
       return;
     }
     
-    // Only check for API key if the selected provider is not Cohere
-    // For Cohere, we'll use the environment variable if available
-    if (selectedProvider !== "cohere" && !apiKey) {
+    const currentApiKey = getCurrentApiKey();
+    if (!currentApiKey) {
       toast({
         title: "API Key Required",
         description: `Please enter your ${selectedProvider} API key to optimize prompts`,
@@ -159,57 +160,22 @@ const Index = () => {
       return;
     }
     
-    setIsOptimizing(true);
     try {
-      // Initialize the client with the API key if provided, otherwise it will use the env variable
-      if (selectedProvider === "cohere") {
-        // For Cohere, use the environment variable if available
-        PromptOptimizer.initializeClient(apiKey || import.meta.env.VITE_COHERE_API_KEY || "");
-        SemanticAnalyzer.initializeClient(apiKey || import.meta.env.VITE_COHERE_API_KEY || "");
-      } else {
-        // For other providers, use the user-provided API key
-        PromptOptimizer.initializeClient(apiKey);
-        SemanticAnalyzer.initializeClient(apiKey);
-      }
-      
-      // Apply mode-specific optimizations
-      let enhancedPrompt = userPrompt;
-      
-      if (optimizationMode === "context") {
-        enhancedPrompt = ContextPrompting.applyContextEnhancement(userPrompt, contextInfo, 'detailed');
-      } else if (optimizationMode === "emotional") {
-        enhancedPrompt = EmotionalPrompting.applyEmotionalEnhancement(userPrompt, emotionalTone, emotionalIntensity, selectedDomain);
-      }
-      
-      const result = await PromptOptimizer.optimizePrompt(
-        enhancedPrompt, 
-        selectedPlatform, 
-        selectedDomain, 
-        optimizationOptions, 
-        selectedMode
-      );
-      
-      const enhancedResult: EnhancedOptimizationResult = {
-        ...result,
-        analysis: {
-          complexity: result.analysis?.complexity || "moderate",
-          intent: result.analysis?.intent || "informational",
-          domain: result.analysis?.domain || selectedDomain,
-          estimatedResponseTime: result.analysis?.estimatedResponseTime || 5,
-          strengths: result.analysis?.strengths || [],
-          weaknesses: result.analysis?.weaknesses || []
-        }
-      };
-      
-      setOptimizationResult(enhancedResult);
-      
-      const modeText = optimizationMode === "context" ? "Context-Enhanced" : 
-                     optimizationMode === "emotional" ? "Emotionally-Optimized" : "Optimized";
-      
-      toast({
-        title: `Prompt ${modeText} Successfully`,
-        description: `Applied ${result.appliedTechniques.length} optimization techniques in ${optimizationMode} mode`
+      const result = await optimizePrompt(userPrompt, {
+        techniques: selectedTechniques,
+        domain: selectedDomain,
+        intent: currentAnalysis?.intent || 'informational',
+        applyDomainSpecific: enhancedOptions.applyDomainSpecific,
+        useQualityPrediction: enhancedOptions.useQualityPrediction,
+        personalized: enhancedOptions.personalized
       });
+      
+      if (result) {
+        toast({
+          title: "Optimization Complete",
+          description: `Applied ${result.appliedTechniques.length} advanced techniques with ${Math.round(result.qualityPrediction.effectiveness)}% predicted effectiveness`,
+        });
+      }
     } catch (error) {
       console.error('Optimization error:', error);
       toast({
@@ -217,8 +183,6 @@ const Index = () => {
         description: "Please check your API key and try again",
         variant: "destructive"
       });
-    } finally {
-      setIsOptimizing(false);
     }
   };
   
@@ -312,31 +276,31 @@ const Index = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <ProviderSelector value={selectedProvider} onChange={setSelectedProvider} />
-                {selectedProvider !== "cohere" && (
-                  <ApiKeyManager provider={selectedProvider} apiKey={apiKey} onChange={setApiKey} />
-                )}
+                <ApiKeyManager 
+                  provider={selectedProvider} 
+                  apiKey={getCurrentApiKey()} 
+                  onChange={(key) => saveApiKey(selectedProvider, key)} 
+                />
                 <PlatformSelector value={selectedPlatform} onChange={setSelectedPlatform} />
                 <DomainSelector value={selectedDomain} onChange={setSelectedDomain} />
               </CardContent>
             </Card>
 
-            {/* Mode-specific additional controls */}
-            {optimizationMode === "context" && (
-              <ContextBuilder 
-                analysis={contextAnalysis}
-                contextInfo={contextInfo}
-                onContextChange={setContextInfo}
-              />
-            )}
-
-            {optimizationMode === "emotional" && (
-              <EmotionalToneSelector
-                tone={emotionalTone}
-                intensity={emotionalIntensity}
-                domain={selectedDomain}
-                analysis={emotionalAnalysis}
-                onToneChange={setEmotionalTone}
-                onIntensityChange={setEmotionalIntensity}
+            {/* Quality Analysis */}
+            {currentAnalysis && (
+              <PromptQualityIndicator 
+                qualityScore={{
+                  clarity: currentAnalysis.semanticStructure.clarity / 100 * 10,
+                  specificity: currentAnalysis.semanticStructure.specificity / 100 * 10,
+                  effectiveness: (currentQualityPrediction?.effectiveness || 0) / 100 * 10,
+                  issues: {
+                    isVague: currentAnalysis.identifiedIssues.some(i => i.type === 'specificity'),
+                    isOverlyBroad: currentAnalysis.identifiedIssues.some(i => i.type === 'goals'),
+                    lacksContext: currentAnalysis.identifiedIssues.some(i => i.type === 'context'),
+                    suggestions: optimizationSuggestions
+                  }
+                }}
+                isAnalyzing={isAnalyzing}
               />
             )}
           </div>
@@ -354,8 +318,30 @@ const Index = () => {
               <CardContent>
                 <AdvancedOptimizer 
                   mode={optimizationMode}
-                  options={optimizationOptions} 
-                  onOptionsChange={setOptimizationOptions} 
+                  options={{
+                    useChainOfThought: selectedTechniques.includes('meta_instruction'),
+                    useFewShot: selectedTechniques.includes('expert_domain_injection'),
+                    useReAct: selectedTechniques.includes('constitutional_ai'),
+                    usePersona: selectedTechniques.includes('expert_domain_injection'),
+                    useConstraints: selectedTechniques.includes('quality_assurance'),
+                    optimizeForTokens: false,
+                    useTreeOfThoughts: selectedTechniques.includes('multi_perspective'),
+                    useSelfConsistency: selectedTechniques.includes('constitutional_ai'),
+                    useRolePlay: selectedTechniques.includes('expert_domain_injection'),
+                    useContextPrompting: true,
+                    useEmotionalPrompting: selectedTechniques.includes('emotional_intelligence')
+                  }} 
+                  onOptionsChange={(options) => {
+                    // Convert legacy options to technique selection
+                    const techniques = [];
+                    if (options.useChainOfThought) techniques.push('meta_instruction');
+                    if (options.usePersona) techniques.push('expert_domain_injection');
+                    if (options.useConstraints) techniques.push('quality_assurance');
+                    if (options.useTreeOfThoughts) techniques.push('multi_perspective');
+                    if (options.useSelfConsistency) techniques.push('constitutional_ai');
+                    if (options.useEmotionalPrompting) techniques.push('emotional_intelligence');
+                    setSelectedTechniques(techniques);
+                  }} 
                   onOptimize={handleOptimize} 
                   isOptimizing={isOptimizing} 
                 />
@@ -364,14 +350,34 @@ const Index = () => {
             
             {/* Results Section */}
             <OptimizationResults 
-              result={optimizationResult} 
+              result={optimizationHistory[0] ? {
+                originalPrompt: optimizationHistory[0].originalPrompt,
+                optimizedPrompt: optimizationHistory[0].optimizedPrompt,
+                systemPrompt: null,
+                analysis: {
+                  complexity: optimizationHistory[0].analysis.complexity,
+                  intent: optimizationHistory[0].analysis.intent,
+                  domain: optimizationHistory[0].analysis.domain,
+                  estimatedResponseTime: 5,
+                  strengths: optimizationHistory[0].qualityPrediction.successFactors,
+                  weaknesses: optimizationHistory[0].qualityPrediction.riskFactors
+                },
+                appliedTechniques: optimizationHistory[0].appliedTechniques,
+                estimatedImprovement: optimizationHistory[0].qualityPrediction.effectiveness,
+                tokenCount: {
+                  original: optimizationHistory[0].analysis.tokenEstimate,
+                  optimized: optimizationHistory[0].analysis.tokenEstimate + 50
+                },
+                domain: optimizationHistory[0].analysis.domain,
+                mode: selectedMode
+              } : null} 
               isOptimizing={isOptimizing} 
             />
 
             {/* Export Section */}
-            {optimizationResult && (
+            {optimizationHistory[0] && (
               <ExportPrompt 
-                optimizedPrompt={optimizationResult.optimizedPrompt} 
+                optimizedPrompt={optimizationHistory[0].optimizedPrompt} 
                 platform={selectedPlatform} 
                 mode={selectedMode} 
                 domain={selectedDomain} 
