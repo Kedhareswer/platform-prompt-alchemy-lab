@@ -190,6 +190,66 @@ export class AIProviderService {
         return operation === 'validate'
           ? 'https://api.anthropic.com/v1/models'
           : 'https://api.anthropic.com/v1/messages';
+
+      case 'google':
+        return operation === 'validate'
+          ? 'https://generativelanguage.googleapis.com/v1/models'
+          : 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
+
+      case 'groq':
+        return operation === 'validate'
+          ? 'https://api.groq.com/openai/v1/models'
+          : 'https://api.groq.com/openai/v1/chat/completions';
+
+      case 'aiml':
+        return operation === 'validate'
+          ? 'https://api.aimlapi.com/v1/models'
+          : 'https://api.aimlapi.com/v1/chat/completions';
+
+      case 'together':
+        return operation === 'validate'
+          ? 'https://api.together.xyz/v1/models'
+          : 'https://api.together.xyz/v1/chat/completions';
+
+      case 'fireworks':
+        return operation === 'validate'
+          ? 'https://api.fireworks.ai/inference/v1/models'
+          : 'https://api.fireworks.ai/inference/v1/chat/completions';
+
+      case 'replicate':
+        return operation === 'validate'
+          ? 'https://api.replicate.com/v1/models'
+          : 'https://api.replicate.com/v1/predictions';
+
+      case 'huggingface':
+        return operation === 'validate'
+          ? 'https://api-inference.huggingface.co/models'
+          : 'https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf';
+
+      case 'perplexity':
+        return operation === 'validate'
+          ? 'https://api.perplexity.ai/chat/completions'
+          : 'https://api.perplexity.ai/chat/completions';
+
+      case 'mistral':
+        return operation === 'validate'
+          ? 'https://api.mistral.ai/v1/models'
+          : 'https://api.mistral.ai/v1/chat/completions';
+
+      case 'deepseek':
+        return operation === 'validate'
+          ? 'https://api.deepseek.com/v1/models'
+          : 'https://api.deepseek.com/v1/chat/completions';
+
+      case '01ai':
+        return operation === 'validate'
+          ? 'https://api.01.ai/v1/models'
+          : 'https://api.01.ai/v1/chat/completions';
+
+      case 'alibaba':
+        return operation === 'validate'
+          ? 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation'
+          : 'https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
         
       default:
         throw new Error(`Unsupported provider: ${this.config?.provider}`);
@@ -224,6 +284,31 @@ export class AIProviderService {
           ...commonHeaders,
           'x-api-key': this.config.apiKey,
           'anthropic-version': '2023-06-01'
+        };
+
+      case 'google':
+        return {
+          ...commonHeaders,
+          'Authorization': `Bearer ${this.config.apiKey}`,
+        };
+
+      case 'huggingface':
+        return {
+          ...commonHeaders,
+          'Authorization': `Bearer ${this.config.apiKey}`,
+        };
+
+      case 'replicate':
+        return {
+          ...commonHeaders,
+          'Authorization': `Token ${this.config.apiKey}`,
+        };
+
+      case 'alibaba':
+        return {
+          ...commonHeaders,
+          'Authorization': `Bearer ${this.config.apiKey}`,
+          'X-DashScope-SSE': 'disable'
         };
       
       default:
@@ -277,6 +362,71 @@ export class AIProviderService {
           ],
           temperature,
           max_tokens: maxTokens
+        };
+
+      case 'google':
+      case 'groq':
+      case 'aiml':
+      case 'together':
+      case 'fireworks':
+      case 'mistral':
+      case 'deepseek':
+      case '01ai':
+      case 'perplexity':
+        return {
+          model: this.config.model || 'gemini-pro',
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a prompt analysis system. Analyze the provided text for clarity, specificity, effectiveness, and suggest improvements. Provide a structured JSON response.'
+            },
+            {
+              role: 'user',
+              content: `Analyze this prompt: "${text}"`
+            }
+          ],
+          temperature,
+          max_tokens: maxTokens
+        };
+
+      case 'huggingface':
+        return {
+          inputs: `Analyze this prompt for quality: "${text}". Rate it on clarity (1-10), specificity (1-10), and effectiveness (1-10). Provide suggestions for improvement. Format as JSON.`,
+          parameters: {
+            temperature,
+            max_new_tokens: maxTokens
+          }
+        };
+
+      case 'replicate':
+        return {
+          version: "meta/llama-2-70b-chat",
+          input: {
+            prompt: `Analyze this prompt: "${text}". Provide clarity, specificity, and effectiveness ratings plus improvement suggestions in JSON format.`,
+            temperature,
+            max_length: maxTokens
+          }
+        };
+
+      case 'alibaba':
+        return {
+          model: this.config.model || 'qwen-plus',
+          input: {
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a prompt analysis system. Analyze the provided text for clarity, specificity, effectiveness, and suggest improvements. Provide a structured JSON response.'
+              },
+              {
+                role: 'user',
+                content: `Analyze this prompt: "${text}"`
+              }
+            ]
+          },
+          parameters: {
+            temperature,
+            max_tokens: maxTokens
+          }
         };
       
       default:
@@ -332,6 +482,71 @@ export class AIProviderService {
           ],
           temperature,
           max_tokens: maxTokens
+        };
+
+      case 'google':
+      case 'groq':
+      case 'aiml':
+      case 'together':
+      case 'fireworks':
+      case 'mistral':
+      case 'deepseek':
+      case '01ai':
+      case 'perplexity':
+        return {
+          model: this.config.model || 'gemini-pro',
+          messages: [
+            {
+              role: 'system',
+              content: `You are an advanced prompt optimization system. Apply the following techniques to optimize the prompt: ${techniquesString}. Focus on the ${domain} domain. Return a JSON object with the optimized prompt and analysis.`
+            },
+            {
+              role: 'user',
+              content: `Optimize this prompt: "${text}"`
+            }
+          ],
+          temperature,
+          max_tokens: maxTokens
+        };
+
+      case 'huggingface':
+        return {
+          inputs: `Optimize the following prompt for the ${domain} domain, applying these techniques: ${techniquesString}. Original: "${text}". Return optimized version with analysis in JSON.`,
+          parameters: {
+            temperature,
+            max_new_tokens: maxTokens
+          }
+        };
+
+      case 'replicate':
+        return {
+          version: "meta/llama-2-70b-chat",
+          input: {
+            prompt: `Optimize this prompt for ${domain}: "${text}". Apply techniques: ${techniquesString}. Return JSON with optimized prompt and analysis.`,
+            temperature,
+            max_length: maxTokens
+          }
+        };
+
+      case 'alibaba':
+        return {
+          model: this.config.model || 'qwen-plus',
+          input: {
+            messages: [
+              {
+                role: 'system',
+                content: `You are an advanced prompt optimization system. Apply the following techniques to optimize the prompt: ${techniquesString}. Focus on the ${domain} domain. Return a JSON object with the optimized prompt and analysis.`
+              },
+              {
+                role: 'user',
+                content: `Optimize this prompt: "${text}"`
+              }
+            ]
+          },
+          parameters: {
+            temperature,
+            max_tokens: maxTokens
+          }
         };
       
       default:
