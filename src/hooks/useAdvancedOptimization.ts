@@ -1,7 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { AIProviderService } from '@/services/aiProviderService';
-import { generateMockAnalysis, generateMockQualityPrediction, generateMockOptimization } from '@/utils/mockResponse';
 
 // Type definitions
 export interface PromptQualityScore {
@@ -314,61 +313,41 @@ export const useAdvancedOptimization = () => {
 
       const provider = aiService.current.getProvider();
       
-      // Real API call if provider is configured
-      if (provider) {
-        try {
-          const analysisResponse = await aiService.current.analyzeText(prompt, {
-            temperature: 0.3,
-            maxTokens: 1000
-          });
-          
-          // Parse the response
-          const analysis = parseAnalysisResponse(analysisResponse, prompt);
-          
-          // Generate quality prediction
-          const prediction: QualityPredictionModel = {
-            effectiveness: Math.min(90, 50 + analysis.semanticStructure.clarity / 10 + analysis.semanticStructure.specificity / 10),
-            successFactors: [
-              analysis.semanticStructure.clarity > 70 ? 'High clarity' : 'Moderate clarity',
-              analysis.semanticStructure.specificity > 70 ? 'Good specificity' : 'Adequate detail'
-            ],
-            riskFactors: analysis.identifiedIssues.map(issue => issue.description),
-            confidenceScore: 0.85
-          };
-
-          // Set state and cache results
-          setCurrentAnalysis(analysis);
-          setCurrentQualityPrediction(prediction);
-          
-          const result = { analysis, prediction };
-          cacheRef.current.set(cacheKey, result);
-          
-          // Select recommended techniques
-          setSelectedTechniques(analysis.recommendedTechniques.slice(0, 3));
-          
-          return analysis;
-        } catch (apiError) {
-          console.error('API analysis failed, using fallback:', apiError);
-          // Fall through to mock implementation on API failure
-        }
+      // Only work with real API - require provider configuration
+      if (!provider) {
+        throw new Error("AI provider not configured. Please set up your API key in the API Key Manager.");
       }
+
+      const analysisResponse = await aiService.current.analyzeText(prompt, {
+        temperature: 0.3,
+        maxTokens: 1000
+      });
       
-      // Fallback to mock implementation if no API key or API call failed
-      console.log('Using mock analysis implementation');
-      const mockAnalysis = generateMockAnalysis(prompt);
-      const mockPrediction = generateMockQualityPrediction(mockAnalysis);
+      // Parse the response
+      const analysis = parseAnalysisResponse(analysisResponse, prompt);
       
+      // Generate quality prediction
+      const prediction: QualityPredictionModel = {
+        effectiveness: Math.min(90, 50 + analysis.semanticStructure.clarity / 10 + analysis.semanticStructure.specificity / 10),
+        successFactors: [
+          analysis.semanticStructure.clarity > 70 ? 'High clarity' : 'Moderate clarity',
+          analysis.semanticStructure.specificity > 70 ? 'Good specificity' : 'Adequate detail'
+        ],
+        riskFactors: analysis.identifiedIssues.map(issue => issue.description),
+        confidenceScore: 0.85
+      };
+
       // Set state and cache results
-      setCurrentAnalysis(mockAnalysis);
-      setCurrentQualityPrediction(mockPrediction);
+      setCurrentAnalysis(analysis);
+      setCurrentQualityPrediction(prediction);
       
-      const result = { analysis: mockAnalysis, prediction: mockPrediction };
+      const result = { analysis, prediction };
       cacheRef.current.set(cacheKey, result);
       
       // Select recommended techniques
-      setSelectedTechniques(mockAnalysis.recommendedTechniques.slice(0, 3));
+      setSelectedTechniques(analysis.recommendedTechniques.slice(0, 3));
       
-      return mockAnalysis;
+      return analysis;
     } catch (error) {
       console.error('Error analyzing prompt:', error);
       toast({
@@ -409,7 +388,7 @@ export const useAdvancedOptimization = () => {
       }
       
       if (!prediction) {
-        prediction = generateMockQualityPrediction(analysis);
+        throw new Error("Quality prediction not available. Please analyze the prompt first.");
       }
 
       // Use selected techniques or options.techniques
@@ -427,54 +406,36 @@ export const useAdvancedOptimization = () => {
 
       const provider = aiService.current.getProvider();
       
-      // Real API call if provider is configured
-      if (provider) {
-        try {
-          const optimizationResponse = await aiService.current.generateOptimizedText(
-            prompt,
-            techniques,
-            options.domain,
-            { temperature: 0.4 }
-          );
-          
-          // Parse the response
-          const result = parseOptimizationResponse(
-            optimizationResponse,
-            prompt,
-            techniques,
-            analysis
-          );
-
-          // Cache and update history
-          cacheRef.current.set(cacheKey, result);
-          setOptimizationHistory(prev => [result, ...prev.slice(0, 9)]);
-          
-          toast({
-            title: "Optimization Complete",
-            description: `Applied ${techniques.length} techniques with ${Math.round(result.qualityPrediction.effectiveness)}% predicted effectiveness`
-          });
-          
-          return result;
-        } catch (apiError) {
-          console.error('API optimization failed, using fallback:', apiError);
-          // Fall through to mock implementation on API failure
-        }
+      // Only work with real API - require provider configuration
+      if (!provider) {
+        throw new Error("AI provider not configured. Please set up your API key in the API Key Manager.");
       }
+
+      const optimizationResponse = await aiService.current.generateOptimizedText(
+        prompt,
+        techniques,
+        options.domain,
+        { temperature: 0.4 }
+      );
       
-      // Fallback to mock implementation if no API key or API call failed
-      console.log('Using mock optimization implementation');
-      const mockResult = generateMockOptimization(prompt, techniques, analysis, prediction);
-      
+      // Parse the response
+      const result = parseOptimizationResponse(
+        optimizationResponse,
+        prompt,
+        techniques,
+        analysis
+      );
+
       // Cache and update history
-      cacheRef.current.set(cacheKey, mockResult);
-      setOptimizationHistory(prev => [mockResult, ...prev.slice(0, 9)]);
+      cacheRef.current.set(cacheKey, result);
+      setOptimizationHistory(prev => [result, ...prev.slice(0, 9)]);
       
       toast({
         title: "Optimization Complete",
-        description: `Applied ${techniques.length} techniques with ${Math.round(mockResult.qualityPrediction.effectiveness)}% predicted effectiveness`
+        description: `Applied ${techniques.length} techniques with ${Math.round(result.qualityPrediction.effectiveness)}% predicted effectiveness`
       });
       
-      return mockResult;
+      return result;
     } catch (error) {
       console.error('Error optimizing prompt:', error);
       toast({
