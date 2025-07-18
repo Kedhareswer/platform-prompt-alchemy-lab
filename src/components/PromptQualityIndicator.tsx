@@ -3,9 +3,20 @@ import React from 'react';
 import { Gauge } from '@/components/ui/gauge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Sparkles, CheckCircle, AlertTriangle, XCircle } from 'lucide-react';
-import { PromptQualityScore } from '@/utils/semanticAnalysis';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+
+interface PromptQualityScore {
+  clarity: number;       // 1-10 scale
+  specificity: number;   // 1-10 scale
+  effectiveness: number; // 1-10 scale
+  issues: {
+    isVague: boolean;
+    isOverlyBroad: boolean;
+    lacksContext: boolean;
+    suggestions: string[];
+  };
+}
 
 interface PromptQualityIndicatorProps {
   qualityScore: PromptQualityScore | null;
@@ -131,7 +142,6 @@ export function PromptQualityIndicator({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {metrics.map(({ key, label, description, tips }) => {
           const value = qualityScore[key];
-          const scoreOutOf10 = Math.round(value * 10);
           
           return (
             <div 
@@ -145,15 +155,15 @@ export function PromptQualityIndicator({
                 
                 <div className="relative w-24 h-24 mx-auto mb-3">
                   <Gauge 
-                    value={scoreOutOf10 * 10} 
+                    value={value * 10} 
                     size="lg" 
                     variant={getGaugeVariant(value)}
                     showValue={false}
                     className="w-full h-full"
-                    aria-label={`${label}: ${scoreOutOf10} out of 10`}
+                    aria-label={`${label}: ${value} out of 10`}
                   />
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-lg font-bold">{scoreOutOf10}</span>
+                    <span className="text-lg font-bold">{value}</span>
                     <span className="text-xs text-muted-foreground">/10</span>
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from "react";
 import { PenTool, Zap, Target, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -17,26 +18,13 @@ import { OptimizationModeSelector, OptimizationMode } from "@/components/Optimiz
 import { ExportPrompt } from "@/components/ExportPrompt";
 import { ProviderSelector } from "@/components/ProviderSelector";
 import { ApiKeyManager } from "@/components/ApiKeyManager";
-import { ContextBuilder } from "@/components/ContextBuilder";
-import { EmotionalToneSelector } from "@/components/EmotionalToneSelector";
 
 // Hooks and Services
 import { useAdvancedOptimization } from "@/hooks/useAdvancedOptimization";
-import { useApp } from "@/contexts/AppContext";
 
 // Types for API key management
 interface APIKeyStorage {
   [provider: string]: string;
-}
-
-// Enhanced optimization options for advanced system
-interface EnhancedOptimizationOptions {
-  techniques: string[];
-  domain: string;
-  intent: string;
-  applyDomainSpecific: boolean;
-  useQualityPrediction: boolean;
-  personalized: boolean;
 }
 
 const Index = () => {
@@ -44,6 +32,7 @@ const Index = () => {
   const {
     analyzePrompt,
     optimizePrompt,
+    configureProvider,
     currentAnalysis,
     currentQualityPrediction,
     optimizationHistory,
@@ -54,9 +43,6 @@ const Index = () => {
     optimizationSuggestions,
     canOptimize
   } = useAdvancedOptimization();
-
-  // App context for global state
-  const { state } = useApp();
 
   // Local state
   const [userPrompt, setUserPrompt] = useState("");
@@ -78,9 +64,9 @@ const Index = () => {
   });
 
   // Enhanced optimization options
-  const [enhancedOptions, setEnhancedOptions] = useState<EnhancedOptimizationOptions>({
-    techniques: ['meta_instruction', 'constitutional_ai', 'expert_domain_injection'],
-    domain: 'general',
+  const [enhancedOptions, setEnhancedOptions] = useState({
+    techniques: selectedTechniques,
+    domain: selectedDomain,
     intent: 'informational',
     applyDomainSpecific: true,
     useQualityPrediction: true,
@@ -94,6 +80,7 @@ const Index = () => {
     setApiKeys(newApiKeys);
     try {
       localStorage.setItem('promptforge_api_keys', JSON.stringify(newApiKeys));
+      configureProvider(provider, key);
     } catch (error) {
       console.error('Failed to save API key:', error);
     }
@@ -102,11 +89,25 @@ const Index = () => {
   // Get current API key for selected provider
   const getCurrentApiKey = () => apiKeys[selectedProvider] || "";
 
+  // Configure provider when it changes
+  useEffect(() => {
+    const currentKey = getCurrentApiKey();
+    if (currentKey) {
+      configureProvider(selectedProvider, currentKey);
+    }
+  }, [selectedProvider, configureProvider]);
+
   // Real-time prompt analysis with debouncing
   const analyzePromptQuality = useCallback(async (prompt: string) => {
     if (!prompt.trim() || prompt === lastAnalyzedPrompt) {
       return;
     }
+    
+    const currentApiKey = getCurrentApiKey();
+    if (!currentApiKey) {
+      return; // Don't analyze if no API key
+    }
+    
     setLastAnalyzedPrompt(prompt);
     
     try {
@@ -115,29 +116,30 @@ const Index = () => {
       console.error('Error analyzing prompt quality:', error);
       toast({
         title: "Analysis Error",
-        description: "Failed to analyze prompt quality. Please try again.",
+        description: "Failed to analyze prompt quality. Please check your API key and try again.",
         variant: "destructive"
       });
     }
-  }, [lastAnalyzedPrompt, analyzePrompt, selectedDomain, toast]);
+  }, [lastAnalyzedPrompt, analyzePrompt, selectedDomain, toast, getCurrentApiKey]);
 
   // Debounced analysis effect
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (userPrompt.trim()) {
+      if (userPrompt.trim() && getCurrentApiKey()) {
         analyzePromptQuality(userPrompt);
       }
-    }, 500);
+    }, 800); // Increased debounce time for API rate limits
     return () => clearTimeout(timer);
-  }, [userPrompt, analyzePromptQuality]);
+  }, [userPrompt, analyzePromptQuality, getCurrentApiKey]);
 
-  // Update enhanced options when domain changes
+  // Update enhanced options when domain or selectedTechniques changes
   useEffect(() => {
     setEnhancedOptions(prev => ({
       ...prev,
-      domain: selectedDomain
+      domain: selectedDomain,
+      techniques: selectedTechniques
     }));
-  }, [selectedDomain]);
+  }, [selectedDomain, selectedTechniques]);
   
   // Advanced optimization handler
   const handleOptimize = async () => {
@@ -161,14 +163,7 @@ const Index = () => {
     }
     
     try {
-      const result = await optimizePrompt(userPrompt, {
-        techniques: selectedTechniques,
-        domain: selectedDomain,
-        intent: currentAnalysis?.intent || 'informational',
-        applyDomainSpecific: enhancedOptions.applyDomainSpecific,
-        useQualityPrediction: enhancedOptions.useQualityPrediction,
-        personalized: enhancedOptions.personalized
-      });
+      const result = await optimizePrompt(userPrompt, enhancedOptions);
       
       if (result) {
         toast({
@@ -287,12 +282,12 @@ const Index = () => {
             </Card>
 
             {/* Quality Analysis */}
-            {currentAnalysis && (
+            {currentAnalysis && currentQualityPrediction && (
               <PromptQualityIndicator 
                 qualityScore={{
-                  clarity: currentAnalysis.semanticStructure.clarity / 100 * 10,
-                  specificity: currentAnalysis.semanticStructure.specificity / 100 * 10,
-                  effectiveness: (currentQualityPrediction?.effectiveness || 0) / 100 * 10,
+                  clarity: currentAnalysis.semanticStructure.clarity / 10,
+                  specificity: currentAnalysis.semanticStructure.specificity / 10,
+                  effectiveness: currentQualityPrediction.effectiveness / 10,
                   issues: {
                     isVague: currentAnalysis.identifiedIssues.some(i => i.type === 'specificity'),
                     isOverlyBroad: currentAnalysis.identifiedIssues.some(i => i.type === 'goals'),
@@ -401,8 +396,8 @@ const Index = () => {
               <span>Domain: {selectedDomain}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-primary rounded-full"></div>
-              <span>Ready</span>
+              <div className={`w-2 h-2 ${getCurrentApiKey() ? 'bg-primary' : 'bg-gray-400'} rounded-full`}></div>
+              <span>{getCurrentApiKey() ? "Ready" : "API Key Required"}</span>
             </div>
           </div>
         </div>
